@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">आरोग्य लिंक</string>
+    <string name="call_112">112 पर कॉल करें</string>
+    <string name="cat_bleeding">गंभीर रक्तस्राव</string>
+    <string name="cat_diabetes">मधुमेह (डायबिटीज)</string>
+    <string name="cat_fever">तेज बुखार</string>
+    <string name="cat_injury">चोट / फ्रैक्चर</string>
+    <string name="cat_medicine">दवा की आवश्यकता</string>
+    <string name="cat_pregnancy">गर्भावस्था / प्रसव</string>
+    <string name="delivery_warning">ध्यान दें: स्थानीय रूप से सहेजना सर्वर तक पहुंचने की पुष्टि नहीं करता जब तक सर्वर से रसीद न मिले।</string>
+    <string name="desc_placeholder">मरीज की हालत, उम्र, लक्षण या अवरुद्ध रास्ते का विवरण दें</string>
+    <string name="emergency_call_notice">यदि आपके पास फोन सिग्नल है और तुरंत मदद चाहिए, तो पहले 112 पर कॉल करें।</string>
+    <string name="emergency_map">आपातकालीन मानचित्र</string>
+    <string name="emergency_map_desc">क्षेत्रीय घटनाएं और चालू स्वास्थ्य केंद्र देखें</string>
+    <string name="healthcare_facilities">स्वास्थ्य सुविधाएं</string>
+    <string name="healthcare_facilities_desc">जिला अस्पताल, सीएचसी और क्लीनिक निर्देशिका</string>
+    <string name="help_information">सहायता और जानकारी</string>
+    <string name="help_information_desc">प्राथमिक उपचार निर्देश और आपातकालीन संपर्क</string>
+    <string name="home_title">आपातकालीन पोर्टल</string>
+    <string name="listen_audio">बोलकर सुनें</string>
+    <string name="location_placeholder">उदा. हेलीपैड के पास, तंबू 4, गोपेश्वर</string>
+    <string name="my_reports">मेरी रिपोर्ट्स</string>
+    <string name="my_reports_desc">अपनी दर्ज की गई रिपोर्ट्स और सत्यापन की स्थिति देखें</string>
+    <string name="report_emergency">आपातकाल रिपोर्ट करें</string>
+    <string name="report_emergency_desc">तत्काल चिकित्सा सहायता या आवश्यक दवाओं का अनुरोध करें</string>
+    <string name="retry_sync">पुनः प्रयास करें</string>
+    <string name="review_report">समीक्षा करें और भेजें</string>
+    <string name="status_offline">सर्वर अनुपलब्ध • स्थानीय रूप से सुरक्षित</string>
+    <string name="status_online">ऑनलाइन • सर्वर कनेक्टेड</string>
+    <string name="status_syncing">सिंक हो रहा है...</string>
+    <string name="step_category">1. आपातकाल का प्रकार चुनें</string>
+    <string name="step_description">4. विवरण या लक्षण (वैकल्पिक)</string>
+    <string name="step_location">3. स्थान विवरण</string>
+    <string name="step_urgency">2. तात्कालिकता का स्तर चुनें</string>
+    <string name="submit_report">आपातकालीन रिपोर्ट भेजें</string>
+    <string name="tagline">मदद साझा करें। जीवन बचाएं।</string>
+    <string name="urgency_disclaimer">तात्कालिकता उपयोगकर्ता द्वारा चुनी गई जानकारी है, यह चिकित्सीय निदान नहीं है।</string>
+    <string name="urgency_high">उच्च — तत्काल सहायता आवश्यक</string>
+    <string name="urgency_low">कम — प्रतीक्षा कर सकते हैं</string>
+    <string name="urgency_medium">मध्यम — शीघ्र ध्यान देने की आवश्यकता</string>
+    <string name="use_gps_location">वर्तमान जीपीएस स्थान का उपयोग करें</string>
+</resources>

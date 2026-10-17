@@ -1,0 +1,8 @@
+org.aarogyalink.app-pngs-0 C:\Users\Rajendra\Desktop\iiid\android\app\build\generated\res\pngs\debug
+org.aarogyalink.app-updated_navigation_xml-1 C:\Users\Rajendra\Desktop\iiid\android\app\build\generated\updated_navigation_xml\debug
+org.aarogyalink.app-packageDebugResources-2 C:\Users\Rajendra\Desktop\iiid\android\app\build\intermediates\incremental\debug\packageDebugResources\merged.dir
+org.aarogyalink.app-packageDebugResources-3 C:\Users\Rajendra\Desktop\iiid\android\app\build\intermediates\incremental\debug\packageDebugResources\stripped.dir
+org.aarogyalink.app-debug-4 C:\Users\Rajendra\Desktop\iiid\android\app\build\intermediates\merged_res\debug\mergeDebugResources
+org.aarogyalink.app-debug-5 C:\Users\Rajendra\Desktop\iiid\android\app\src\debug\res
+org.aarogyalink.app-main-6 C:\Users\Rajendra\Desktop\iiid\android\app\src\main\res
+gradleHome-0 C:\Users\Rajendra\.gradle
