@@ -6,7 +6,7 @@ from contextlib import asynccontextmanager
 from app.core.config import settings
 from app.db.session import engine, Base
 from app.db.seed import seed_database
-from app.api import health, auth, reports, sync, facilities
+from app.api import health, auth, reports, sync, facilities, roads, dashboard
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -37,6 +37,8 @@ app.include_router(auth.router)
 app.include_router(reports.router)
 app.include_router(sync.router)
 app.include_router(facilities.router)
+app.include_router(roads.router)
+app.include_router(dashboard.router)
 
 # Also expose under /api/v1 for standard API versioning
 app.include_router(health.router, prefix=settings.API_V1_STR)
@@ -44,6 +46,8 @@ app.include_router(auth.router, prefix=settings.API_V1_STR)
 app.include_router(reports.router, prefix=settings.API_V1_STR)
 app.include_router(sync.router, prefix=settings.API_V1_STR)
 app.include_router(facilities.router, prefix=settings.API_V1_STR)
+app.include_router(roads.router, prefix=settings.API_V1_STR)
+app.include_router(dashboard.router, prefix=settings.API_V1_STR)
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

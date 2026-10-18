@@ -1,7 +1,10 @@
+/* ========================================================
+   AAROGYA LINK — COMPLETE RED/GREEN DESIGN SYSTEM & STYLING
+   ======================================================== */
+
 :root {
   --bg-app: #f4f6f9;
   --bg-card: #ffffff;
-  --bg-card-secondary: #ffffff;
   --border-subtle: #e2e8f0;
   --border-card: #e2e8f0;
   
@@ -10,14 +13,19 @@
   --primary-blue-light: #eff6ff;
   --primary-icon-bg: #dbeafe;
   
+  /* Red: Needs, Emergencies, Critical */
   --urgent-red: #dc2626;
+  --urgent-red-dark: #b91c1c;
   --urgent-red-bg: #fef2f2;
   --urgent-red-border: #fecaca;
   
+  /* Green: Offers, Resources, Confirmed Assistance */
   --status-green: #16a34a;
+  --status-green-dark: #15803d;
   --status-green-bg: #dcfce7;
   --status-green-border: #bbf7d0;
   
+  /* Amber: Warnings, Risky, Review */
   --warning-amber: #d97706;
   --warning-amber-bg: #fef3c7;
   --warning-amber-border: #fde68a;
@@ -30,10 +38,12 @@
   --radius-md: 12px;
   --radius-lg: 16px;
   --radius-xl: 20px;
+  --radius-pill: 9999px;
   
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
   --shadow-card: 0 2px 8px rgba(15, 23, 42, 0.06);
+  --shadow-pop: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
 }
 
 * {
@@ -44,7 +54,7 @@
 
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background-color: var(--bg-app);
+  background-color: #f1f5f9;
   color: var(--text-primary);
   min-height: 100vh;
   line-height: 1.5;
@@ -59,7 +69,7 @@ button {
   transition: all 0.2s ease;
 }
 
-/* Mobile-first App View Container */
+/* Outer layout wrapper */
 .app-viewport {
   max-width: 520px;
   margin: 0 auto;
@@ -69,6 +79,17 @@ button {
   flex-direction: column;
   position: relative;
   box-shadow: 0 0 40px rgba(0, 0, 0, 0.08);
+}
+
+/* Fullscreen / Desktop responder dashboard mode */
+.desktop-viewport {
+  max-width: 1440px;
+  margin: 0 auto;
+  min-height: 100vh;
+  background: #0f172a;
+  color: #f8fafc;
+  display: flex;
+  flex-direction: column;
 }
 
 .screen-container {
@@ -107,19 +128,17 @@ button {
 }
 
 .brand-title-text {
+  font-family: 'Outfit', sans-serif;
   font-size: 19px;
   font-weight: 800;
+  letter-spacing: -0.3px;
   color: var(--text-primary);
-  letter-spacing: -0.01em;
-  font-family: 'Outfit', sans-serif;
 }
 
 .brand-tagline-text {
   font-size: 11px;
-  color: var(--primary-blue);
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  color: var(--primary-blue);
 }
 
 .header-controls {
@@ -128,91 +147,86 @@ button {
   gap: 8px;
 }
 
-.lang-btn {
-  background: #f1f5f9;
-  color: var(--text-primary);
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 700;
-  border: 1px solid var(--border-subtle);
-}
-
 .tts-btn {
-  width: 36px;
-  height: 36px;
   background: #f1f5f9;
+  color: var(--primary-blue);
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--primary-blue);
+  transition: all 0.2s ease;
 }
 
-/* B. Full-Width Connectivity Status Banner */
-.connectivity-banner {
+.tts-btn:hover {
+  background: #e2e8f0;
+}
+
+.lang-btn {
+  background: #f1f5f9;
+  color: var(--text-primary);
+  font-weight: 700;
+  font-size: 12px;
+  padding: 8px 12px;
+  border-radius: 20px;
+}
+
+.lang-btn:hover {
+  background: #e2e8f0;
+}
+
+/* Status Banner */
+.status-banner {
+  background: var(--status-green-bg);
+  border: 1px solid var(--status-green-border);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 16px;
-  border-radius: var(--radius-md);
   margin-bottom: 14px;
+}
+
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--status-green);
+  display: inline-block;
+}
+
+.status-text {
   font-size: 13px;
   font-weight: 600;
-}
-
-.connectivity-banner.online {
-  background: var(--status-green-bg);
   color: var(--status-green);
-  border: 1px solid var(--status-green-border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.connectivity-banner.offline {
-  background: var(--urgent-red-bg);
-  color: var(--urgent-red);
-  border: 1px solid var(--urgent-red-border);
-}
-
-.status-indicator-dot {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  display: inline-block;
-  margin-right: 8px;
-}
-
-.connectivity-banner.online .status-indicator-dot {
-  background: var(--status-green);
-  box-shadow: 0 0 6px var(--status-green);
-}
-
-.connectivity-banner.offline .status-indicator-dot {
-  background: var(--urgent-red);
-  box-shadow: 0 0 6px var(--urgent-red);
-}
-
-/* C. Emergency Contact Card (Red Alert) */
-.emergency-alert-card {
+/* 112 Emergency Card */
+.emergency-call-card {
   background: var(--urgent-red-bg);
   border: 1px solid var(--urgent-red-border);
   border-radius: var(--radius-lg);
   padding: 16px;
-  margin-bottom: 14px;
-  box-shadow: var(--shadow-sm);
+  margin-bottom: 16px;
 }
 
-.emergency-alert-header {
+.emergency-call-header {
   display: flex;
   align-items: flex-start;
   gap: 10px;
   margin-bottom: 12px;
+  color: var(--urgent-red);
 }
 
-.emergency-alert-text {
+.emergency-call-title {
   font-size: 13px;
-  color: #991b1b;
   font-weight: 600;
   line-height: 1.4;
+  color: var(--urgent-red);
 }
 
 .btn-call-112 {
@@ -227,39 +241,36 @@ button {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  box-shadow: 0 4px 10px rgba(220, 38, 38, 0.25);
-  text-decoration: none;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25);
 }
 
 .btn-call-112:hover {
-  background: #b91c1c;
-  transform: translateY(-1px);
+  background: var(--urgent-red-dark);
 }
 
-/* D. Primary Action Card (Blue Report Emergency) */
+/* Primary Report Emergency Card */
 .primary-action-card {
-  width: 100%;
   background: var(--primary-blue);
   color: #ffffff;
   border-radius: var(--radius-lg);
-  padding: 20px 18px;
-  margin-bottom: 14px;
+  padding: 18px;
   display: flex;
   align-items: center;
   gap: 16px;
   box-shadow: 0 6px 16px rgba(37, 99, 235, 0.25);
   cursor: pointer;
-  border: none;
+  margin-bottom: 14px;
   text-align: left;
+  border: none;
+  width: 100%;
 }
 
 .primary-action-card:hover {
   background: var(--primary-blue-hover);
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35);
 }
 
-.primary-card-icon {
+.primary-card-icon-box {
   width: 48px;
   height: 48px;
   background: rgba(255, 255, 255, 0.2);
@@ -267,32 +278,30 @@ button {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #ffffff;
   flex-shrink: 0;
 }
 
 .primary-card-title {
-  font-size: 18px;
-  font-weight: 800;
-  color: #ffffff;
-  font-family: 'Outfit', sans-serif;
+  font-size: 17px;
+  font-weight: 700;
 }
 
 .primary-card-desc {
   font-size: 13px;
-  color: #dbeafe;
+  color: rgba(255, 255, 255, 0.85);
   margin-top: 2px;
 }
 
-/* E. Secondary Action Cards (Grey Cards) */
-.secondary-cards-list {
+/* Secondary Action Cards */
+.secondary-actions-stack {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  margin-bottom: 16px;
 }
 
 .secondary-action-card {
-  background: var(--bg-card);
+  background: #ffffff;
   border: 1px solid var(--border-card);
   border-radius: var(--radius-lg);
   padding: 16px 18px;
@@ -336,140 +345,566 @@ button {
   margin-top: 2px;
 }
 
-/* Category Grid Tiles (Screen 2) */
-.category-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
+/* ========================================================
+   FEATURE C & RED/GREEN: ADD TO THE MAP (PDF PAGE 3)
+   ======================================================== */
+
+.choice-toggle-container {
+  display: flex;
+  background: #ffffff;
+  border: 1.5px solid var(--border-subtle);
+  border-radius: var(--radius-pill);
+  padding: 4px;
   margin: 16px 0;
+  box-shadow: var(--shadow-sm);
 }
 
-.category-tile {
+.choice-toggle-btn {
+  flex: 1;
+  padding: 12px 14px;
+  border-radius: var(--radius-pill);
+  font-size: 14px;
+  font-weight: 700;
+  text-align: center;
+  color: var(--text-secondary);
+  background: transparent;
+  transition: all 0.2s ease;
+}
+
+.choice-toggle-btn.active-need {
+  background: var(--urgent-red-dark);
+  color: #ffffff;
+  box-shadow: 0 4px 10px rgba(185, 28, 28, 0.3);
+}
+
+.choice-toggle-btn.active-offer {
+  background: var(--status-green-dark);
+  color: #ffffff;
+  box-shadow: 0 4px 10px rgba(21, 128, 61, 0.3);
+}
+
+.category-chips-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin: 14px 0;
+}
+
+.category-chip {
   background: #ffffff;
-  border: 2px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
-  padding: 18px 14px;
+  border: 1.5px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 14px 8px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  min-height: 104px;
+  gap: 6px;
   cursor: pointer;
   text-align: center;
-  box-shadow: var(--shadow-sm);
+  position: relative;
   transition: all 0.2s ease;
+  min-height: 86px;
 }
 
-.category-tile:hover {
-  border-color: #93c5fd;
-  transform: translateY(-2px);
-}
-
-.category-tile.selected {
-  border-color: var(--primary-blue);
-  background: #eff6ff;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
-}
-
-.category-tile-icon {
-  font-size: 28px;
-}
-
-.category-tile-label {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--text-primary);
-}
-
-.category-tile.selected .category-tile-label {
-  color: var(--primary-blue);
-}
-
-/* Urgency Pills */
-.urgency-selector-row {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  margin: 12px 0;
-}
-
-.urgency-btn {
-  padding: 12px 8px;
-  border-radius: var(--radius-md);
-  font-size: 13px;
-  font-weight: 700;
-  text-align: center;
-  cursor: pointer;
-  border: 2px solid transparent;
-}
-
-.urgency-btn.high {
-  background: var(--urgent-red-bg);
-  color: var(--urgent-red);
-  border-color: var(--urgent-red-border);
-}
-.urgency-btn.high.selected {
-  background: var(--urgent-red);
-  color: #ffffff;
+.category-chip.selected-need {
+  background: #fef2f2;
   border-color: var(--urgent-red);
 }
 
-.urgency-btn.medium {
-  background: var(--warning-amber-bg);
-  color: var(--warning-amber);
-  border-color: var(--warning-amber-border);
-}
-.urgency-btn.medium.selected {
-  background: var(--warning-amber);
-  color: #ffffff;
-  border-color: var(--warning-amber);
-}
-
-.urgency-btn.low {
-  background: var(--status-green-bg);
-  color: var(--status-green);
-  border-color: var(--status-green-border);
-}
-.urgency-btn.low.selected {
-  background: var(--status-green);
-  color: #ffffff;
+.category-chip.selected-offer {
+  background: #f0fdf4;
   border-color: var(--status-green);
 }
 
-/* Buttons */
-.btn-primary-action {
+.category-chip-check {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: white;
+}
+
+.selected-need .category-chip-check {
+  background: #0f172a;
+}
+
+.selected-offer .category-chip-check {
+  background: var(--status-green);
+}
+
+.category-chip-icon {
+  font-size: 22px;
+}
+
+.category-chip-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Counter */
+.counter-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #ffffff;
+  border: 1.5px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 12px 18px;
+  margin: 12px 0;
+}
+
+.counter-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: bold;
+  color: var(--text-primary);
+}
+
+.counter-value {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+/* Red / Green Submit Action Buttons */
+.btn-send-need {
   width: 100%;
-  height: 50px;
-  background: var(--primary-blue);
+  height: 52px;
+  background: var(--urgent-red-dark);
   color: #ffffff;
   border-radius: var(--radius-md);
-  font-size: 15px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
+  font-size: 16px;
+  font-weight: 800;
+  box-shadow: 0 6px 14px rgba(185, 28, 28, 0.3);
+  margin-top: 14px;
 }
 
-.btn-primary-action:hover {
-  background: var(--primary-blue-hover);
-}
-
-.btn-secondary-action {
+.btn-send-offer {
   width: 100%;
-  height: 46px;
-  background: #f1f5f9;
+  height: 52px;
+  background: var(--status-green-dark);
+  color: #ffffff;
+  border-radius: var(--radius-md);
+  font-size: 16px;
+  font-weight: 800;
+  box-shadow: 0 6px 14px rgba(21, 128, 61, 0.3);
+  margin-top: 14px;
+}
+
+/* ========================================================
+   FEATURE A & D: EMERGENCY MAP & RED/GREEN MARKERS (PDF P.1)
+   ======================================================== */
+
+.map-filter-pills {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 6px 0;
+  margin-bottom: 10px;
+}
+
+.map-filter-pill {
+  padding: 8px 18px;
+  border-radius: var(--radius-pill);
+  font-size: 13px;
+  font-weight: 700;
+  background: #ffffff;
   color: var(--text-primary);
   border: 1px solid var(--border-subtle);
+  white-space: nowrap;
+}
+
+.map-filter-pill.active {
+  background: #0f172a;
+  color: #ffffff;
+  border-color: #0f172a;
+}
+
+.impact-overlay-card {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 500;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
   border-radius: var(--radius-md);
-  font-size: 14px;
-  font-weight: 600;
+  padding: 10px 14px;
+  box-shadow: var(--shadow-md);
+  font-size: 12px;
+}
+
+.affected-area-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 500;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  box-shadow: var(--shadow-md);
+  text-align: right;
+}
+
+/* Leaflet Custom Marker HTML */
+.marker-need-circle {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #dc2626;
+  border: 2px solid #ffffff;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  color: #ffffff;
+  position: relative;
+}
+
+.marker-offer-square {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: #15803d;
+  border: 2px solid #ffffff;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  position: relative;
+}
+
+.marker-status-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: bold;
+  border: 1px solid #ffffff;
+}
+
+.marker-status-badge.verified {
+  background: #0f172a;
+  color: #ffffff;
+}
+
+.marker-status-badge.unverified {
+  background: #ffffff;
+  color: #0f172a;
+  border: 1.5px dashed #0f172a;
+}
+
+.marker-status-badge.flagged {
+  background: #ef4444;
+  color: #ffffff;
+}
+
+/* Selected Incident Card Bottom on Map */
+.map-selected-card {
+  background: #ffffff;
+  border-radius: var(--radius-xl);
+  padding: 16px;
+  box-shadow: var(--shadow-pop);
+  margin-top: 12px;
+}
+
+.map-selected-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.selected-cat-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+}
+
+.selected-cat-icon.need {
+  background: #dc2626;
+}
+
+.selected-cat-icon.offer {
+  background: #15803d;
+  border-radius: 10px;
+}
+
+/* ========================================================
+   FEATURE B: LIVE INCIDENT CAMERA (PDF PAGE 2)
+   ======================================================== */
+
+.camera-screen-box {
+  background: #090d16;
+  border-radius: var(--radius-xl);
+  color: #ffffff;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 580px;
+}
+
+.camera-top-bar {
+  padding: 14px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(0,0,0,0.5);
+  z-index: 10;
+}
+
+.live-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(15, 23, 42, 0.85);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.live-record-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ef4444;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.camera-viewfinder {
+  flex: 1;
+  position: relative;
+  background: linear-gradient(180deg, #1e293b 0%, #334155 50%, #475569 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  padding: 20px;
+}
+
+.waterline-guide {
+  width: 100%;
+  border-top: 2px dashed #ffffff;
+  position: absolute;
+  top: 55%;
+  left: 0;
+  display: flex;
+  justify-content: center;
+}
+
+.waterline-label {
+  position: absolute;
+  top: -18px;
+  left: 14px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #ffffff;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+}
+
+.water-depth-badge {
+  background: #eab308;
+  color: #0f172a;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 800;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+.camera-controls-panel {
+  background: #090d16;
+  padding: 16px 20px 24px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.camera-mode-tabs {
+  display: flex;
+  gap: 24px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.camera-mode-tab {
+  color: #64748b;
+  cursor: pointer;
+  padding-bottom: 4px;
+}
+
+.camera-mode-tab.active {
+  color: #ffffff;
+  border-bottom: 2px solid #ffffff;
+}
+
+.shutter-btn-outer {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 4px solid #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.shutter-btn-outer:hover {
+  transform: scale(1.05);
+}
+
+.shutter-btn-inner {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: #ffffff;
+}
+
+/* ========================================================
+   FEATURE E: ROADS AND TRANSPORT (PDF PAGE 4)
+   ======================================================== */
+
+.transit-card {
+  background: #ffffff;
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 10px;
+}
+
+.transit-card.open-route {
+  border-left: 5px solid var(--status-green);
+}
+
+.transit-card.risky-route {
+  border-left: 5px solid var(--warning-amber);
+}
+
+.transit-card.blocked-route {
+  border-left: 5px solid var(--urgent-red);
+}
+
+/* ========================================================
+   FEATURE G: RESPONDER CONSOLE 3-COLUMN DESKTOP (PDF PAGE 5)
+   ======================================================== */
+
+.responder-grid {
+  display: grid;
+  grid-template-columns: 360px 1fr 400px;
+  gap: 18px;
+  padding: 18px;
+  height: calc(100vh - 65px);
+  overflow: hidden;
+}
+
+@media (max-width: 1024px) {
+  .responder-grid {
+    grid-template-columns: 1fr;
+    height: auto;
+    overflow: visible;
+  }
+}
+
+.console-column {
+  background: #ffffff;
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--border-subtle);
+}
+
+.console-col-header {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border-subtle);
+  background: #f8fafc;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.queue-items-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.queue-item-card {
+  background: #ffffff;
+  border: 1.5px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.queue-item-card:hover {
+  border-color: #94a3b8;
+}
+
+.queue-item-card.selected {
+  border-color: var(--primary-blue);
+  background: #eff6ff;
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.1);
+}
+
+.trust-meter-bar {
+  height: 6px;
+  background: #e2e8f0;
+  border-radius: 3px;
+  overflow: hidden;
+  margin: 6px 0;
+}
+
+.trust-meter-fill {
+  height: 100%;
+  background: #15803d;
+  border-radius: 3px;
 }
 
 /* Bottom Navigation Bar */
@@ -484,8 +919,9 @@ button {
   border-top: 1px solid var(--border-subtle);
   display: flex;
   justify-content: space-around;
+  align-items: center;
   padding: 8px 0;
-  z-index: 100;
+  z-index: 1000;
   box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
 }
 
@@ -498,100 +934,28 @@ button {
   color: var(--text-secondary);
   font-size: 11px;
   font-weight: 600;
-  padding: 4px 10px;
-  border-radius: var(--radius-sm);
-  min-width: 60px;
+  padding: 4px 8px;
+  min-width: 54px;
 }
 
 .bottom-nav-item.active {
-  color: var(--primary-blue);
+  color: var(--status-green-dark);
 }
 
-.bottom-nav-item.active .nav-icon-container {
-  color: var(--primary-blue);
-}
-
-/* Form inputs */
-.form-group {
-  margin-bottom: 16px;
-}
-
-.form-label {
-  display: block;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin-bottom: 6px;
-}
-
-.form-input, .form-textarea {
-  width: 100%;
-  background: #ffffff;
-  border: 1.5px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  padding: 12px 14px;
-  font-size: 14px;
-  color: var(--text-primary);
-  outline: none;
-}
-
-.form-input:focus, .form-textarea:focus {
-  border-color: var(--primary-blue);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
-}
-
-/* Badges */
-.badge-pill {
-  display: inline-flex;
+.center-camera-btn {
+  width: 50px;
+  height: 50px;
+  background: #0f172a;
+  color: #ffffff;
+  border-radius: 50%;
+  display: flex;
   align-items: center;
-  gap: 5px;
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 700;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.35);
+  margin-top: -16px;
+  transition: transform 0.15s ease;
 }
 
-.badge-pill.high {
-  background: var(--urgent-red-bg);
-  color: var(--urgent-red);
-}
-
-.badge-pill.medium {
-  background: var(--warning-amber-bg);
-  color: var(--warning-amber);
-}
-
-.badge-pill.low {
-  background: var(--status-green-bg);
-  color: var(--status-green);
-}
-
-.badge-pill.received {
-  background: var(--status-green-bg);
-  color: var(--status-green);
-}
-
-.badge-pill.verified {
-  background: #eff6ff;
-  color: var(--primary-blue);
-  border: 1px solid #bfdbfe;
-}
-
-.badge-pill.pending {
-  background: #f1f5f9;
-  color: #64748b;
-}
-
-.badge-pill.failed {
-  background: var(--urgent-red-bg);
-  color: var(--urgent-red);
-}
-
-/* Map container */
-.map-display-box {
-  height: 380px;
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  border: 1px solid var(--border-subtle);
-  margin-top: 12px;
+.center-camera-btn:hover {
+  transform: scale(1.08);
 }

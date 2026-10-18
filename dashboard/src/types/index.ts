@@ -1,12 +1,22 @@
+export type ReportType = 'NEED' | 'OFFER';
+
 export type EmergencyType =
   | 'Pregnancy'
   | 'Diabetes'
   | 'Bleeding'
   | 'Fever'
   | 'Injury'
-  | 'Medicine needed';
+  | 'Medicine needed'
+  | 'Insulin'
+  | 'Medicines'
+  | 'First aid'
+  | 'Clean water'
+  | 'Food'
+  | 'Blankets'
+  | 'Oxygen'
+  | 'Transport';
 
-export type UrgencyLevel = 'Low' | 'Medium' | 'High';
+export type UrgencyLevel = 'Critical' | 'Urgent' | 'Can wait' | 'High' | 'Medium' | 'Low';
 
 export type SyncStatus =
   | 'LOCAL_PENDING'
@@ -18,17 +28,31 @@ export type VerificationStatus =
   | 'UNVERIFIED'
   | 'VERIFIED'
   | 'REJECTED'
-  | 'RESOLVED';
+  | 'RESOLVED'
+  | 'FLAGGED';
 
 export interface EmergencyReport {
   report_id: string;
-  emergency_type: EmergencyType;
+  report_type?: ReportType;
+  emergency_type: EmergencyType | string;
   urgency: UrgencyLevel;
   created_at: string;
   latitude?: number | null;
   longitude?: number | null;
   location_name?: string | null;
+  ward?: string | null;
+  people_affected?: number | null;
   description?: string | null;
+  evidence_type?: 'photo' | 'voice' | 'none';
+  evidence_url?: string | null;
+  water_depth?: string | null;
+  trust_score?: number | null;
+  ai_check_status?: string | null;
+  device_fingerprint?: string | null;
+  flagged_reason?: string | null;
+  nearby_match?: string | null;
+  assigned_to?: string | null;
+  action_status?: string | null;
   sync_status: SyncStatus;
   verification_status: VerificationStatus;
   verified_at?: string | null;
@@ -61,6 +85,52 @@ export interface VerificationAuditLog {
   new_status: string;
   notes?: string | null;
   timestamp: string;
+}
+
+export interface RoadSegment {
+  road_id: string;
+  road_name: string;
+  status: 'OPEN' | 'RISKY' | 'BLOCKED';
+  hazard_details?: string | null;
+  travel_time?: string | null;
+  destination?: string | null;
+  distance_km?: number | null;
+  last_reported_at: string;
+  reported_by?: string | null;
+}
+
+export interface TransportOption {
+  option_id: string;
+  transport_type: string;
+  badge: string;
+  status: 'OPEN' | 'RISKY' | 'BLOCKED' | 'WAITING';
+  description: string;
+  is_available: boolean;
+}
+
+export interface TransportRequest {
+  request_id: string;
+  transport_type: string;
+  pickup_location: string;
+  destination?: string | null;
+  people_count: number;
+  urgency: string;
+  status: string;
+  notes?: string | null;
+  created_at: string;
+}
+
+export interface DashboardSummary {
+  open_requests: number;
+  needs_count: number;
+  offers_count: number;
+  verified_count: number;
+  unverified_count: number;
+  resolved_count: number;
+  flagged_count: number;
+  affected_area_km2: number;
+  impact_zone: string;
+  sample_note: string;
 }
 
 export interface UserProfile {

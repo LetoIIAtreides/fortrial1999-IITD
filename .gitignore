@@ -1,0 +1,44 @@
+# Android build artifacts & caches
+android/app/build/
+android/.gradle/
+android/local.properties
+**/build/
+.gradle/
+*.apk
+*.aab
+*.dex
+
+# Node / Web Dashboard
+dashboard/node_modules/
+dashboard/dist/
+node_modules/
+dist/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Python / Backend
+backend/__pycache__/
+backend/*.db
+backend/*.sqlite
+backend/*.sqlite3
+backend/.pytest_cache/
+**/__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+.env
+.venv/
+env/
+venv/
+
+# OS and IDE files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.idea/
+.vscode/
+*.iml

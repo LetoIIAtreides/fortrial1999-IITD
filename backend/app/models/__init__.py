@@ -2,6 +2,7 @@ from app.models.report import Report, EmergencyType, UrgencyLevel, SyncStatus, V
 from app.models.facility import Facility
 from app.models.user import User
 from app.models.audit import VerificationAuditLog
+from app.models.road import RoadSegment, TransportOption, TransportRequest
 
 __all__ = [
     "Report",
@@ -12,4 +13,7 @@ __all__ = [
     "Facility",
     "User",
     "VerificationAuditLog",
+    "RoadSegment",
+    "TransportOption",
+    "TransportRequest",
 ]

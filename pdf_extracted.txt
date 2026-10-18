@@ -1,0 +1,197 @@
+
+=== PAGE 1 ===
+AAROGYA LINK
+Area map
+Online
+All
+Needs
+Offers
+Roads
+Ward 3 
+Ward 5 
+Ward 4
+Impact probability
+High
+Medium
+Low
+Circle = need 
+Square = offer
+Estimated affected area
+~2.4 km²
+AI estimate. Sample data.
+Ambulance
+Camp A: insulin low
+?
+Water 200 L
+?
+?
+Insulin needed
+Ward 4 · 3 reports within 200 m · 1 
+live photo
+Urgent
+Unverified
+AI check: likely genuine
+I can help
+Details
+Map
+Needs
+Offers
+Me
+
+=== PAGE 2 ===
+estimated waterline
+LIVE CAMERA
+GPS locked · within 8 m
+10.52 N, 76.21 E (example)
+18 Oct 2026 · 09:14 · Ward 4
+Water depth ~1.2 m (low confidence)
+Tip: keep a door, pole or person in frame. It gives scale for 
+the depth estimate.
+Photo
+Video
+Area sweep
+Send text only
+Online
+Camera only. Gallery photos are not accepted, so old pictures 
+cannot be reused. 
+AI estimates depth and area from the photo and nearby reports. A 
+responder confirms.
+
+=== PAGE 3 ===
+Add to the map
+I need help
+I can give help
+What is short? Tap all that apply
+Insulin
+Medicines
+Pregnancy
+First aid
+Clean water
+Food
+Blankets
+Oxygen
+Transport
+People affected
+−
+3
++
+Critical
+Urgent
+Can wait
+Live photo
+Voice note
+Voice is turned into text for responders. Text only is fine too.
+Pinned by GPS: Ward 4
+Exact spot is shown only to verified 
+responders
+Move
+Send need
+Every report is checked before it is marked verified. Repeated false 
+reports can get a device blocked.
+
+=== PAGE 4 ===
+AAROGYA LINK
+Roads and 
+transport
+Sample data
+Road D 
+Road B 
+Road C
+Road status
+Open
+Risky
+Blocked
+You
+Camp A
+Town hospital
+Bridge 1 blocked
+!
+Water 0.3 m
+Way to Town hospital
+about 9 km
+Road status comes from live reports. Reports older than 3 hours 
+turn grey.
+Boat
+Best option
+2 boats at the ghat, 8 seats. About 1 h 
+20 min.
+Open
+Walk
+Road C has water 0.3 m. About 2 h 10 
+min. Avoid at night.
+! Risky
+Truck or tractor
+Bridge 1 blocked, water 0.8 m. 3 
+reports, 20 min ago.
+Blocked
+Ambulance (4x4)
+Waiting at Camp A. Can go once Road 
+C is open.
+! Waiting
+Request boat
+Report road
+
+=== PAGE 5 ===
+AAROGYA LINK Responder console
+District control room
+Sample data
+Online
+Incoming requests
+14 open · sorted by urgency
+Insulin needed
+Ward 4 · 3 reports merged · 12 min ago
+Trust 78 · Likely genuine
+Urgent
+Pregnancy care
+Ward 4 · field worker report · 25 min ago
+Verified
+Critical
+Medicines
+Ward 3 · 1 report, no photo · 40 min ago
+Trust 46 · Needs review
+Food, 200 packets
+Outside impact zone · repeated device · 1 h ago
+Trust 14 · Likely false
+Impact map and live resources
+14 needs
+9 offers
+5 verified
+Ward 3 
+Ward 5 
+Ward 4
+Impact probability
+High
+Med
+Low
+Estimated affected area
+~2.4 km² (AI estimate)
+3 reports
+?
+?
+!
+Flagged: outside zone
+Camp A: insulin low
+Ambulance 1
+?
+Water 200 L
+Circle = need. Square = offer. Check = verified. Dashed ? = not yet verified. ! = flagged by 
+checks.
+Insulin needed
+3 people · Urgent · Ward 4 · device ending 4F2
+Live photo, 09:14. Example image.
+Verification checks
+Location is inside the high impact zone
+Photo taken live, time and place match
+3 separate devices reported within 200 m
+Request fits the area: flooded, medicine stock low
+!
+New device with no report history
+Trust score (AI-assisted)
+78 / 100
+AI only ranks and flags. A responder decides. Anyone flagged 
+can appeal.
+Nearest match: Camp A has insulin (low stock), 1.1 km 
+away.
+Verify and assign
+Ask for more info
+Mark as false

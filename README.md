@@ -59,13 +59,16 @@ iiid/
 
 | Requirement | Implementation Details | Test / Build Status |
 |---|---|---|
-| **Android Application Compilation** | Kotlin 2.2.10, AGP 9.3.1, Jetpack Compose, Material 3, SDK 36 | **BUILD SUCCESSFUL** (`app-debug.apk` 20.1 MB) |
+| **Android Application Compilation** | Kotlin 2.2.10, AGP 9.3.1, Jetpack Compose, Material 3, SDK 36 | **BUILD SUCCESSFUL** (`app-debug.apk` 20.6 MB) |
+| **10 Required Functional Screens** | Home, Report Emergency, My Reports, Emergency Map (PDF p.1), Add Need/Offer (PDF p.3), Live Camera (PDF p.2), Roads & Transport (PDF p.4), Facilities, Help & Info, Responder Console (PDF p.5) | **100% IMPLEMENTED & VERIFIED ON EMULATOR** |
+| **Red / Green Visual Language (Sec. 17)** | Red Circle for Needs/Emergencies ("I Need Help"), Green Square for Offers/Resources ("I Can Give Help"), Open/Blocked road indicators | **VERIFIED ON LIVE SCREENS** |
+| **Marker Symbols & Status** | Circle = Need, Square = Offer, Checkmark (`✓`) = Verified, Dashed (`?`) = Unverified, Warning (`!`) = Flagged | **VERIFIED ON EMULATOR & WEB** |
 | **Local Persistence before Network** | SQLite `AarogyaDatabaseHelper` saves reports locally before network request with stable UUID | **VERIFIED** (Flow-reactive updates) |
 | **Server Idempotence** | Client-generated UUID `report_id` prevents duplicate server records on retry | **VERIFIED** (`test_e2e_flow.py` & pytest) |
-| **FastAPI Backend & DB Persistence** | FastAPI 0.110.0, SQLAlchemy 2.0, Alembic, PostgreSQL / SQLite engine | **VERIFIED** (7/7 pytest tests passed) |
-| **Responder Web Dashboard** | React 18, TypeScript, Vite 5, Leaflet maps, Lucide icons, glassmorphism | **VERIFIED** (`npm run build` completed) |
+| **FastAPI Backend & DB Persistence** | FastAPI 0.110.0, SQLAlchemy 2.0, Alembic, SQLite / PostgreSQL engine | **VERIFIED** (9/9 pytest tests passed) |
+| **Roads & Transport Subsystem** | `/roads`, `/roads/report`, `/transport/options`, `/transport/request` | **VERIFIED** (Integrated with Map & Dashboard) |
+| **Responder Console & AI Trust Score** | 3-column triage, 5-point verification check, AI trust score (78/100), nearest match | **VERIFIED** (Live assign & audit logging) |
 | **Authorized Verification & Audit Log** | JWT Bearer authentication, RBAC (`responder`, `admin`), immutable `verification_audit_logs` | **VERIFIED** (401 on unauthenticated, 200 on authorized) |
-| **Status Reflection in App** | Mobile app retrieves server-confirmed status (`VERIFIED`/`RESOLVED`) via `/sync/pull` | **VERIFIED** (`test_e2e_flow.py`) |
 | **112 Emergency Notice** | “If you have a working phone signal and need urgent help, call 112 first” with direct dial | **IMPLEMENTED** in Android & Dashboard |
 | **Accessibility & Spoken Labels** | Android `TextToSpeech` readout, bilingual English/Hindi, 48dp touch targets | **IMPLEMENTED** |
 | **No Fake Mesh/BLE Claims** | Modular repository interface without speculative BLE, Rust, or mesh dependencies | **STRICTLY ENFORCED** |

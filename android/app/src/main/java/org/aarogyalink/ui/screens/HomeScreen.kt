@@ -23,11 +23,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.CloudOff
+import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.DirectionsBoat
 import androidx.compose.material.icons.filled.HealthAndSafety
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LocalHospital
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.NotificationsActive
+import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.material.icons.filled.Warning
@@ -257,7 +260,63 @@ fun HomeScreen(
             }
         }
 
-        Spacer(modifier = Modifier.height(18.dp))
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // 3b. Red / Green Quick Actions (Red Circle = Need Help, Green Square = Give Help)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Button(
+                onClick = { onNavigate(Screen.AddNeedOffer.route) },
+                colors = ButtonDefaults.buttonColors(containerColor = UrgentRed),
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier
+                    .weight(1f)
+                    .height(50.dp)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .size(10.dp)
+                            .background(Color.White, CircleShape)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "I Need Help",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 13.sp,
+                        color = Color.White
+                    )
+                }
+            }
+
+            Button(
+                onClick = { onNavigate(Screen.AddNeedOffer.route) },
+                colors = ButtonDefaults.buttonColors(containerColor = SuccessGreen),
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier
+                    .weight(1f)
+                    .height(50.dp)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .size(10.dp)
+                            .background(Color.White, RoundedCornerShape(2.dp))
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "I Can Give Help",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 13.sp,
+                        color = Color.White
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
 
         // 4. Primary Actions
         ActionMenuCard(
@@ -300,6 +359,32 @@ fun HomeScreen(
         Spacer(modifier = Modifier.height(12.dp))
 
         ActionMenuCard(
+            title = "Roads and transport",
+            subtitle = "Way to hospital (9 km), boats, route clearance",
+            icon = Icons.Default.DirectionsBoat,
+            iconTint = BluePrimary,
+            cardBg = MaterialTheme.colorScheme.surface,
+            titleColor = MaterialTheme.colorScheme.onSurface,
+            subtitleColor = Slate500,
+            onClick = { onNavigate(Screen.RoadsTransport.route) }
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        ActionMenuCard(
+            title = "Live incident camera",
+            subtitle = "Waterline watermark & verified photo evidence",
+            icon = Icons.Default.CameraAlt,
+            iconTint = BluePrimary,
+            cardBg = MaterialTheme.colorScheme.surface,
+            titleColor = MaterialTheme.colorScheme.onSurface,
+            subtitleColor = Slate500,
+            onClick = { onNavigate(Screen.LiveIncidentCamera.route) }
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        ActionMenuCard(
             title = stringResource(R.string.healthcare_facilities),
             subtitle = stringResource(R.string.healthcare_facilities_desc),
             icon = Icons.Default.LocalHospital,
@@ -308,6 +393,19 @@ fun HomeScreen(
             titleColor = MaterialTheme.colorScheme.onSurface,
             subtitleColor = Slate500,
             onClick = { onNavigate(Screen.HealthcareFacilities.route) }
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        ActionMenuCard(
+            title = "Responder console",
+            subtitle = "District control room, trust score & triage",
+            icon = Icons.Default.Security,
+            iconTint = BluePrimary,
+            cardBg = MaterialTheme.colorScheme.surface,
+            titleColor = MaterialTheme.colorScheme.onSurface,
+            subtitleColor = Slate500,
+            onClick = { onNavigate(Screen.ResponderConsole.route) }
         )
 
         Spacer(modifier = Modifier.height(12.dp))

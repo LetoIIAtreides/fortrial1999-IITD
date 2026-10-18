@@ -130,6 +130,49 @@ class ReportViewModel(application: Application) : AndroidViewModel(application),
         }
     }
 
+    fun submitReport(
+        emergencyType: String,
+        urgency: String,
+        latitude: Double?,
+        longitude: Double?,
+        locationName: String?,
+        description: String?,
+        onComplete: (Boolean) -> Unit = {}
+    ) {
+        isSubmitting.value = true
+        submissionMessage.value = null
+        isError.value = false
+
+        viewModelScope.launch {
+            val entity = ReportEntity(
+                emergencyType = emergencyType,
+                urgency = urgency,
+                latitude = latitude,
+                longitude = longitude,
+                locationName = locationName?.ifBlank { null },
+                description = description?.ifBlank { null },
+                syncStatus = SyncStatus.LOCAL_PENDING
+            )
+
+            repository.saveReportLocally(entity)
+            val result = repository.submitReportOnline(entity)
+
+            isSubmitting.value = false
+            if (result.isSuccess) {
+                submissionMessage.value = "Report confirmed and received by emergency response server."
+                isError.value = false
+                resetForm()
+                onComplete(true)
+            } else {
+                SyncScheduler.triggerOneTimeSync(getApplication())
+                submissionMessage.value = "Saved safely on device. Will automatically sync when connected."
+                isError.value = false
+                resetForm()
+                onComplete(false)
+            }
+        }
+    }
+
     fun retrySync(report: ReportEntity) {
         viewModelScope.launch {
             val result = repository.submitReportOnline(report)
