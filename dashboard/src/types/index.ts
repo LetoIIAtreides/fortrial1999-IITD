@@ -58,7 +58,7 @@ export interface EmergencyReport {
   verified_at?: string | null;
   verified_by?: string | null;
   verification_notes?: string | null;
-  last_synced_at: string;
+  last_synced_at?: string | null;
 }
 
 export interface HealthcareFacility {

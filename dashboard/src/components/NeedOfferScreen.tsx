@@ -1,336 +1,593 @@
-import React, { useState } from 'react';
-import { 
-  ArrowLeft, 
-  Camera, 
-  Mic, 
-  MapPin, 
-  Check, 
+import React, { useState, useEffect } from 'react';
+import {
+  ArrowLeft,
+  Camera,
+  MapPin,
+  Check,
   AlertCircle,
   Plus,
-  Minus
+  Minus,
+  PlusCircle,
+  Clock,
+  Sparkles,
+  Activity,
+  Pill,
+  Baby,
+  PlusSquare,
+  Droplets,
+  Utensils,
+  Bed,
+  Wind,
+  Truck,
+  Tent,
+  Filter,
+  CheckCircle2,
 } from 'lucide-react';
+import { tokens } from '../tokens';
 import { api } from '../api/client';
 import { EmergencyReport } from '../types';
+import { storage } from '../utils/storage';
+import { VerificationBadge, ReportStatusBadge } from './common/Badges';
+import { Language, translations } from '../i18n/translations';
 
-interface AddNeedOfferScreenProps {
+interface NeedOfferScreenProps {
   initialMode?: 'NEED' | 'OFFER';
   onNavigateBack: () => void;
-  onReportCreated: (newReport: EmergencyReport) => void;
-  onOpenLiveCamera: () => void;
+  onOpenLiveCamera?: () => void;
+  lang?: Language;
 }
 
-const CATEGORIES = [
-  { id: 'Insulin', label: 'Insulin', icon: '💧' },
-  { id: 'Medicines', label: 'Medicines', icon: '💊' },
-  { id: 'Pregnancy', label: 'Pregnancy', icon: '🤰' },
-  { id: 'First aid', label: 'First aid', icon: '✚' },
-  { id: 'Clean water', label: 'Clean water', icon: '🍶' },
-  { id: 'Food', label: 'Food', icon: '🍲' },
-  { id: 'Blankets', label: 'Blankets', icon: '🛏️' },
-  { id: 'Oxygen', label: 'Oxygen', icon: '🤿' },
-  { id: 'Transport', label: 'Transport', icon: '🚐' },
+const RESOURCE_ITEMS = [
+  { id: 'Insulin', label: 'Insulin', icon: Activity, color: '#0284c7' },
+  { id: 'Medicines', label: 'Medicines', icon: Pill, color: '#8b5cf6' },
+  { id: 'Pregnancy care', label: 'Pregnancy care', icon: Baby, color: '#ec4899' },
+  { id: 'First aid supplies', label: 'First aid supplies', icon: PlusSquare, color: '#16a34a' },
+  { id: 'Clean water', label: 'Clean water', icon: Droplets, color: '#0284c7' },
+  { id: 'Food', label: 'Food', icon: Utensils, color: '#ea580c' },
+  { id: 'Blankets', label: 'Blankets', icon: Bed, color: '#6366f1' },
+  { id: 'Oxygen', label: 'Oxygen', icon: Wind, color: '#06b6d4' },
+  { id: 'Transport', label: 'Transport', icon: Truck, color: '#4b5563' },
+  { id: 'Shelter', label: 'Shelter', icon: Tent, color: '#d97706' },
 ];
 
-export const AddNeedOfferScreen: React.FC<AddNeedOfferScreenProps> = ({
+export const NeedOfferScreen: React.FC<NeedOfferScreenProps> = ({
   initialMode = 'NEED',
   onNavigateBack,
-  onReportCreated,
-  onOpenLiveCamera,
+  lang = 'en',
 }) => {
-  const [reportType, setReportType] = useState<'NEED' | 'OFFER'>(initialMode);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>(['Insulin', 'Medicines']);
-  const [peopleCount, setPeopleCount] = useState<number>(3);
-  const [urgency, setUrgency] = useState<'Critical' | 'Urgent' | 'Can wait'>('Urgent');
-  const [hasPhoto, setHasPhoto] = useState<boolean>(false);
-  const [voiceNoteRecorded, setVoiceNoteRecorded] = useState<boolean>(false);
-  const [ward, setWard] = useState<string>('Ward 4');
+  const t = translations[lang];
+
+  // Tabs: 'needs' | 'offers' | 'my_posts' | 'create_new'
+  const [activeTab, setActiveTab] = useState<'needs' | 'offers' | 'my_posts' | 'create_new'>(
+    'needs'
+  );
+
+  // Form State for creating need/offer
+  const [postKind, setPostKind] = useState<'NEED' | 'OFFER'>(initialMode);
+  const [selectedItem, setSelectedItem] = useState<string>('Insulin');
+  const [quantity, setQuantity] = useState<number>(1);
+  const [unit, setUnit] = useState<string>('vials');
+  const [urgency, setUrgency] = useState<string>('Urgent');
+  const [peopleAffected, setPeopleAffected] = useState<number>(1);
+  const [availableUntil, setAvailableUntil] = useState<string>('24 hours');
+  const [locationName, setLocationName] = useState<string>('Ward 4 Relief Station');
   const [description, setDescription] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
-  const toggleCategory = (catId: string) => {
-    if (selectedCategories.includes(catId)) {
-      if (selectedCategories.length > 1) {
-        setSelectedCategories(selectedCategories.filter(c => c !== catId));
-      }
-    } else {
-      setSelectedCategories([...selectedCategories, catId]);
+  // Data lists
+  const [resources, setResources] = useState<EmergencyReport[]>([]);
+  const [filterItem, setFilterItem] = useState<string>('ALL');
+  const [verifiedOnly, setVerifiedOnly] = useState<boolean>(false);
+
+  const fetchResources = async () => {
+    try {
+      const res = await api.getResources();
+      setResources(res || []);
+    } catch {
+      // Fallback to local storage reports
+      setResources(storage.getReports());
     }
   };
 
-  const handleSubmit = async () => {
+  useEffect(() => {
+    fetchResources();
+  }, []);
+
+  const handleCreatePost = async (e: React.FormEvent) => {
+    e.preventDefault();
     setIsSubmitting(true);
-    const newId = `rep-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-    const catString = selectedCategories.join(', ');
+
+    const postId = `res-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
     const nowIso = new Date().toISOString();
 
-    const payload = {
-      report_id: newId,
-      report_type: reportType,
-      emergency_type: selectedCategories[0] || 'Insulin',
-      urgency: urgency,
-      ward: ward,
-      people_affected: peopleCount,
-      location_name: `Pinned by GPS: ${ward}`,
-      latitude: 30.5564,
-      longitude: 79.5662,
-      description: description || `${catString} needed for ${peopleCount} people in ${ward}.`,
-      evidence_type: hasPhoto ? 'photo' : (voiceNoteRecorded ? 'voice' : 'none'),
-      water_depth: hasPhoto ? '~1.2 m' : null,
+    const newPost: EmergencyReport = {
+      report_id: postId,
+      report_type: postKind,
+      emergency_type: selectedItem,
+      urgency: urgency as any,
       created_at: nowIso,
+      location_name: locationName.trim() || 'Chamoli Ward 4',
+      people_affected: peopleAffected,
+      description: `${quantity} ${unit}. ${description.trim()}`.trim(),
+      sync_status: 'LOCAL_PENDING',
+      verification_status: 'UNVERIFIED',
     };
 
+    // Save locally
+    storage.saveReportLocally(newPost);
+
     try {
-      const result = await api.createReport(payload);
-      onReportCreated(result);
+      await api.postResource({
+        report_id: postId,
+        report_type: postKind,
+        emergency_type: selectedItem,
+        urgency: urgency,
+        location_name: locationName.trim(),
+        people_affected: peopleAffected,
+        description: `${quantity} ${unit}. ${description.trim()}`.trim(),
+        created_at: nowIso,
+      });
+      storage.markReportServerReceived(postId);
     } catch {
-      // Local fallback if offline
-      const fallbackReport: EmergencyReport = {
-        ...payload,
-        evidence_type: (hasPhoto ? 'photo' : (voiceNoteRecorded ? 'voice' : 'none')) as 'photo' | 'voice' | 'none',
-        sync_status: 'LOCAL_PENDING',
-        verification_status: 'UNVERIFIED',
-        last_synced_at: nowIso,
-      };
-      onReportCreated(fallbackReport);
+      // Saved locally
     } finally {
       setIsSubmitting(false);
+      fetchResources();
+      setActiveTab(postKind === 'NEED' ? 'needs' : 'offers');
     }
   };
 
+  const getItemIcon = (itemName: string) => {
+    const found = RESOURCE_ITEMS.find((it) => it.id.toLowerCase() === itemName.toLowerCase());
+    if (found) {
+      const Icon = found.icon;
+      return <Icon size={20} color={found.color} />;
+    }
+    return <Activity size={20} color={tokens.colors.primaryBlue} />;
+  };
+
+  // Filtered lists
+  const currentList = resources.filter((r) => {
+    if (activeTab === 'needs' && r.report_type !== 'NEED') return false;
+    if (activeTab === 'offers' && r.report_type !== 'OFFER') return false;
+    if (filterItem !== 'ALL' && !r.emergency_type.toLowerCase().includes(filterItem.toLowerCase())) return false;
+    if (verifiedOnly && r.verification_status !== 'VERIFIED') return false;
+    return true;
+  });
+
   return (
-    <div style={{ paddingBottom: 20 }}>
-      {/* Header with back navigation */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-        <button
-          onClick={onNavigateBack}
-          style={{
-            width: 40,
-            height: 40,
-            borderRadius: '50%',
-            background: '#ffffff',
-            border: '1.5px solid #e2e8f0',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: '#0f172a'
-          }}
-        >
-          <ArrowLeft size={18} />
-        </button>
-        <h2 style={{ fontSize: 20, fontWeight: 800, color: '#0f172a' }}>Add to the map</h2>
-      </div>
-
-      {/* Choice Toggle: I need help (Red) vs I can give help (Green) */}
-      <div className="choice-toggle-container">
-        <button
-          className={`choice-toggle-btn ${reportType === 'NEED' ? 'active-need' : ''}`}
-          onClick={() => setReportType('NEED')}
-        >
-          I need help
-        </button>
-        <button
-          className={`choice-toggle-btn ${reportType === 'OFFER' ? 'active-offer' : ''}`}
-          onClick={() => setReportType('OFFER')}
-        >
-          I can give help
-        </button>
-      </div>
-
-      {/* Categories Header */}
-      <div style={{ marginTop: 16 }}>
-        <div style={{ fontSize: 13, fontWeight: 800, color: '#0f172a' }}>
-          {reportType === 'NEED' ? 'What is short? Tap all that apply' : 'What can you offer? Tap all that apply'}
-        </div>
-
-        {/* 3x3 Category Grid */}
-        <div className="category-chips-grid">
-          {CATEGORIES.map((cat) => {
-            const isSelected = selectedCategories.includes(cat.id);
-            const chipClass = isSelected
-              ? (reportType === 'NEED' ? 'selected-need' : 'selected-offer')
-              : '';
-
-            return (
-              <div
-                key={cat.id}
-                className={`category-chip ${chipClass}`}
-                onClick={() => toggleCategory(cat.id)}
-              >
-                {isSelected && (
-                  <div className="category-chip-check">
-                    <Check size={11} strokeWidth={3} />
-                  </div>
-                )}
-                <span className="category-chip-icon">{cat.icon}</span>
-                <span className="category-chip-label">{cat.label}</span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* People Affected Counter */}
-      <div style={{ marginTop: 12 }}>
-        <div style={{ fontSize: 13, fontWeight: 800, color: '#0f172a', marginBottom: 6 }}>
-          {reportType === 'NEED' ? 'People affected' : 'People capacity / stock units'}
-        </div>
-        <div className="counter-box">
-          <button 
-            className="counter-btn"
-            onClick={() => setPeopleCount(Math.max(1, peopleCount - 1))}
-          >
-            <Minus size={16} />
-          </button>
-          <span className="counter-value">{peopleCount}</span>
-          <button 
-            className="counter-btn"
-            onClick={() => setPeopleCount(peopleCount + 1)}
-          >
-            <Plus size={16} />
-          </button>
-        </div>
-      </div>
-
-      {/* Urgency Selector */}
-      <div style={{ marginTop: 12 }}>
-        <div style={{ fontSize: 13, fontWeight: 800, color: '#0f172a', marginBottom: 6 }}>Urgency</div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+    <div style={{ padding: '16px', maxWidth: 520, margin: '0 auto', paddingBottom: 85 }}>
+      {/* Top Header */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <button
-            onClick={() => setUrgency('Critical')}
+            onClick={onNavigateBack}
+            aria-label="Back to home"
             style={{
-              padding: '12px 6px',
-              borderRadius: 12,
-              fontSize: 13,
-              fontWeight: 700,
-              background: urgency === 'Critical' ? '#b91c1c' : '#fef2f2',
-              color: urgency === 'Critical' ? '#ffffff' : '#b91c1c',
-              border: '1.5px solid #fecaca',
+              width: 40,
+              height: 40,
+              borderRadius: tokens.radius.chip,
+              border: `1px solid ${tokens.colors.border}`,
+              backgroundColor: tokens.colors.white,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
             }}
           >
-            Critical
+            <ArrowLeft size={20} color={tokens.colors.navyText} />
           </button>
-          <button
-            onClick={() => setUrgency('Urgent')}
-            style={{
-              padding: '12px 6px',
-              borderRadius: 12,
-              fontSize: 13,
-              fontWeight: 700,
-              background: urgency === 'Urgent' ? '#0f172a' : '#f1f5f9',
-              color: urgency === 'Urgent' ? '#ffffff' : '#0f172a',
-              border: '1.5px solid #e2e8f0',
-            }}
-          >
-            Urgent
-          </button>
-          <button
-            onClick={() => setUrgency('Can wait')}
-            style={{
-              padding: '12px 6px',
-              borderRadius: 12,
-              fontSize: 13,
-              fontWeight: 700,
-              background: urgency === 'Can wait' ? '#15803d' : '#f0fdf4',
-              color: urgency === 'Can wait' ? '#ffffff' : '#15803d',
-              border: '1.5px solid #bbf7d0',
-            }}
-          >
-            Can wait
-          </button>
-        </div>
-      </div>
-
-      {/* Live Photo & Voice Note Buttons */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 16 }}>
-        <button
-          onClick={onOpenLiveCamera}
-          style={{
-            height: 48,
-            background: hasPhoto ? '#ecfdf5' : '#ffffff',
-            border: hasPhoto ? '2px solid #16a34a' : '1.5px solid #0f172a',
-            borderRadius: 12,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 8,
-            fontWeight: 700,
-            fontSize: 13,
-            color: '#0f172a'
-          }}
-        >
-          <Camera size={18} /> {hasPhoto ? 'Photo Attached' : 'Live photo'}
-        </button>
-
-        <button
-          onClick={() => setVoiceNoteRecorded(!voiceNoteRecorded)}
-          style={{
-            height: 48,
-            background: voiceNoteRecorded ? '#ecfdf5' : '#ffffff',
-            border: voiceNoteRecorded ? '2px solid #16a34a' : '1.5px solid #0f172a',
-            borderRadius: 12,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 8,
-            fontWeight: 700,
-            fontSize: 13,
-            color: '#0f172a'
-          }}
-        >
-          <Mic size={18} /> {voiceNoteRecorded ? 'Voice Attached' : 'Voice note'}
-        </button>
-      </div>
-      <div style={{ fontSize: 11, color: '#64748b', marginTop: 4, textAlign: 'center' }}>
-        Voice is turned into text for responders. Text only is fine too.
-      </div>
-
-      {/* Pinned by GPS Card */}
-      <div style={{
-        background: '#ffffff',
-        border: '1.5px solid #e2e8f0',
-        borderRadius: 14,
-        padding: '14px 16px',
-        marginTop: 16,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <MapPin size={20} color="#16a34a" />
           <div>
-            <div style={{ fontSize: 14, fontWeight: 800, color: '#0f172a' }}>Pinned by GPS: {ward}</div>
-            <div style={{ fontSize: 11, color: '#64748b' }}>Exact spot is shown only to verified responders</div>
+            <h1 style={{ fontSize: 20, fontWeight: 800, color: tokens.colors.navyText, margin: 0 }}>
+              {t.needsAndResources}
+            </h1>
+            <div style={{ fontSize: 12, color: tokens.colors.mutedText }}>
+              Community Medical & Relief Logistics
+            </div>
           </div>
         </div>
-        <button
-          onClick={() => {
-            const nextWard = ward === 'Ward 4' ? 'Ward 3' : (ward === 'Ward 3' ? 'Ward 5' : 'Ward 4');
-            setWard(nextWard);
-          }}
-          style={{
-            background: 'transparent',
-            color: '#15803d',
-            fontWeight: 800,
-            fontSize: 13,
-          }}
-        >
-          Move
-        </button>
+
+        {activeTab !== 'create_new' && (
+          <button
+            onClick={() => setActiveTab('create_new')}
+            style={{
+              backgroundColor: tokens.colors.primaryBlue,
+              color: tokens.colors.white,
+              border: 'none',
+              borderRadius: tokens.radius.chip,
+              padding: '8px 12px',
+              fontSize: 13,
+              fontWeight: 700,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              cursor: 'pointer',
+            }}
+          >
+            <PlusCircle size={16} />
+            Post
+          </button>
+        )}
       </div>
 
-      {/* Submit Button: Red "Send need" or Green "Send offer" */}
-      <button
-        onClick={handleSubmit}
-        disabled={isSubmitting}
-        className={reportType === 'NEED' ? 'btn-send-need' : 'btn-send-offer'}
-      >
-        {isSubmitting ? 'Sending...' : (reportType === 'NEED' ? 'Send need' : 'Send offer')}
-      </button>
+      {/* Tabs */}
+      {activeTab !== 'create_new' && (
+        <>
+          <div style={{ display: 'flex', gap: 6, marginBottom: 14 }}>
+            {(['needs', 'offers', 'my_posts'] as const).map((tabKey) => {
+              const label =
+                tabKey === 'needs' ? '● Needs' : tabKey === 'offers' ? '■ Offers' : 'My Posts';
+              const isSelected = activeTab === tabKey;
+              return (
+                <button
+                  key={tabKey}
+                  onClick={() => setActiveTab(tabKey)}
+                  style={{
+                    flex: 1,
+                    minHeight: 40,
+                    borderRadius: tokens.radius.chip,
+                    backgroundColor: isSelected ? tokens.colors.navyText : tokens.colors.cardGrey,
+                    color: isSelected ? tokens.colors.white : tokens.colors.navyText,
+                    border: 'none',
+                    fontWeight: 700,
+                    fontSize: 13,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
 
-      {/* Disclaimer */}
-      <div style={{ fontSize: 11, color: '#64748b', textAlign: 'center', marginTop: 10, lineHeight: 1.4 }}>
-        Every report is checked before it is marked verified. Repeated false reports can get a device blocked.
-      </div>
+          {/* Filters Bar */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, overflowX: 'auto', paddingBottom: 8, marginBottom: 12 }}>
+            <button
+              onClick={() => setFilterItem('ALL')}
+              style={{
+                padding: '5px 12px',
+                borderRadius: tokens.radius.full,
+                border: filterItem === 'ALL' ? `1.5px solid ${tokens.colors.primaryBlue}` : `1px solid ${tokens.colors.border}`,
+                backgroundColor: filterItem === 'ALL' ? tokens.colors.paleBlue : tokens.colors.white,
+                color: filterItem === 'ALL' ? tokens.colors.primaryBlue : tokens.colors.navyText,
+                fontSize: 12,
+                fontWeight: 700,
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              All Items
+            </button>
+            {RESOURCE_ITEMS.slice(0, 5).map((it) => (
+              <button
+                key={it.id}
+                onClick={() => setFilterItem(it.id)}
+                style={{
+                  padding: '5px 12px',
+                  borderRadius: tokens.radius.full,
+                  border: filterItem === it.id ? `1.5px solid ${tokens.colors.primaryBlue}` : `1px solid ${tokens.colors.border}`,
+                  backgroundColor: filterItem === it.id ? tokens.colors.paleBlue : tokens.colors.white,
+                  color: filterItem === it.id ? tokens.colors.primaryBlue : tokens.colors.navyText,
+                  fontSize: 12,
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {it.label}
+              </button>
+            ))}
+          </div>
+
+          {/* List of Resource Cards */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {currentList.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '36px 16px', backgroundColor: tokens.colors.white, borderRadius: tokens.radius.card }}>
+                <Clock size={32} color={tokens.colors.mutedText} style={{ margin: '0 auto 8px auto' }} />
+                <div style={{ fontSize: 15, fontWeight: 700, color: tokens.colors.navyText, marginBottom: 4 }}>
+                  No posts found in this view
+                </div>
+                <div style={{ fontSize: 13, color: tokens.colors.mutedText }}>
+                  Tap the "Post" button above to register a need or offer assistance.
+                </div>
+              </div>
+            ) : (
+              currentList.map((item) => (
+                <div
+                  key={item.report_id}
+                  style={{
+                    padding: '16px',
+                    backgroundColor: tokens.colors.white,
+                    borderRadius: tokens.radius.card,
+                    border: `1px solid ${tokens.colors.border}`,
+                    boxShadow: tokens.shadow.card,
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <div
+                        style={{
+                          width: 38,
+                          height: 38,
+                          borderRadius: 10,
+                          backgroundColor: tokens.colors.paleBlue,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        {getItemIcon(item.emergency_type)}
+                      </div>
+                      <div>
+                        <div style={{ fontSize: 15, fontWeight: 700, color: tokens.colors.navyText }}>
+                          {item.emergency_type}
+                        </div>
+                        <div style={{ fontSize: 12, color: tokens.colors.mutedText }}>
+                          {item.location_name || 'Chamoli Relief Sector'} · {new Date(item.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </div>
+                      </div>
+                    </div>
+
+                    <span
+                      style={{
+                        padding: '4px 10px',
+                        borderRadius: tokens.radius.full,
+                        fontSize: 11,
+                        fontWeight: 800,
+                        backgroundColor: item.report_type === 'NEED' ? '#FEF2F2' : '#F0FDF4',
+                        color: item.report_type === 'NEED' ? tokens.colors.emergencyRed : tokens.colors.successGreen,
+                      }}
+                    >
+                      {item.report_type === 'NEED' ? '● NEED' : '■ OFFER'}
+                    </span>
+                  </div>
+
+                  {item.description && (
+                    <div style={{ fontSize: 13, color: '#334155', lineHeight: '18px', marginBottom: 10 }}>
+                      {item.description}
+                    </div>
+                  )}
+
+                  {/* Corroborated matching note from backend if available */}
+                  {item.nearby_match && (
+                    <div
+                      style={{
+                        padding: '8px 10px',
+                        backgroundColor: '#EFF6FF',
+                        border: '1px solid #BFDBFE',
+                        borderRadius: 8,
+                        fontSize: 12,
+                        color: '#1E40AF',
+                        fontWeight: 600,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 6,
+                        marginBottom: 8,
+                      }}
+                    >
+                      <Sparkles size={14} />
+                      Possible match: {item.nearby_match}
+                    </div>
+                  )}
+
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: `1px solid ${tokens.colors.border}`, paddingTop: 8 }}>
+                    <VerificationBadge status={item.verification_status} />
+                    <span style={{ fontSize: 12, color: tokens.colors.mutedText, fontWeight: 500 }}>
+                      Urgency: <strong>{item.urgency}</strong>
+                    </span>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </>
+      )}
+
+      {/* ================= CREATE NEW POST FORM ================= */}
+      {activeTab === 'create_new' && (
+        <form onSubmit={handleCreatePost} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          {/* Segmented Control: I need help vs I can give help */}
+          <div style={{ display: 'flex', gap: 10, marginBottom: 8 }}>
+            <button
+              type="button"
+              onClick={() => setPostKind('NEED')}
+              style={{
+                flex: 1,
+                minHeight: 48,
+                borderRadius: tokens.radius.chip,
+                backgroundColor: postKind === 'NEED' ? tokens.colors.emergencyRed : tokens.colors.cardGrey,
+                color: postKind === 'NEED' ? tokens.colors.white : tokens.colors.navyText,
+                border: 'none',
+                fontWeight: 800,
+                fontSize: 14,
+                cursor: 'pointer',
+              }}
+            >
+              ● I Need Help
+            </button>
+            <button
+              type="button"
+              onClick={() => setPostKind('OFFER')}
+              style={{
+                flex: 1,
+                minHeight: 48,
+                borderRadius: tokens.radius.chip,
+                backgroundColor: postKind === 'OFFER' ? tokens.colors.successGreen : tokens.colors.cardGrey,
+                color: postKind === 'OFFER' ? tokens.colors.white : tokens.colors.navyText,
+                border: 'none',
+                fontWeight: 800,
+                fontSize: 14,
+                cursor: 'pointer',
+              }}
+            >
+              ■ I Can Give Help
+            </button>
+          </div>
+
+          {/* Item Category Vector Grid */}
+          <div>
+            <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: tokens.colors.navyText, marginBottom: 8 }}>
+              Select Item / Supply
+            </label>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+              {RESOURCE_ITEMS.map((item) => {
+                const Icon = item.icon;
+                const isSelected = selectedItem === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => setSelectedItem(item.id)}
+                    style={{
+                      padding: '10px 12px',
+                      borderRadius: tokens.radius.chip,
+                      border: isSelected ? `2px solid ${tokens.colors.primaryBlue}` : `1px solid ${tokens.colors.border}`,
+                      backgroundColor: isSelected ? tokens.colors.paleBlue : tokens.colors.white,
+                      color: isSelected ? tokens.colors.primaryBlue : tokens.colors.navyText,
+                      fontWeight: isSelected ? 800 : 600,
+                      fontSize: 13,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 8,
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                    }}
+                  >
+                    <Icon size={18} color={item.color} />
+                    <span>{item.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Quantity & Unit */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+            <div>
+              <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: tokens.colors.navyText, marginBottom: 4 }}>
+                Quantity
+              </label>
+              <input
+                type="number"
+                min={1}
+                value={quantity}
+                onChange={(e) => setQuantity(Number(e.target.value))}
+                style={{
+                  width: '100%',
+                  minHeight: 44,
+                  borderRadius: tokens.radius.chip,
+                  border: `1px solid ${tokens.colors.border}`,
+                  padding: '0 12px',
+                  boxSizing: 'border-box',
+                }}
+              />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: tokens.colors.navyText, marginBottom: 4 }}>
+                Unit
+              </label>
+              <input
+                type="text"
+                value={unit}
+                onChange={(e) => setUnit(e.target.value)}
+                placeholder="vials, boxes, liters, kits"
+                style={{
+                  width: '100%',
+                  minHeight: 44,
+                  borderRadius: tokens.radius.chip,
+                  border: `1px solid ${tokens.colors.border}`,
+                  padding: '0 12px',
+                  boxSizing: 'border-box',
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Location */}
+          <div>
+            <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: tokens.colors.navyText, marginBottom: 4 }}>
+              Location / Relief Camp
+            </label>
+            <input
+              type="text"
+              required
+              value={locationName}
+              onChange={(e) => setLocationName(e.target.value)}
+              placeholder="e.g. Town Relief Camp B, Near Ghat"
+              style={{
+                width: '100%',
+                minHeight: 44,
+                borderRadius: tokens.radius.chip,
+                border: `1px solid ${tokens.colors.border}`,
+                padding: '0 12px',
+                boxSizing: 'border-box',
+              }}
+            />
+          </div>
+
+          {/* Details */}
+          <div>
+            <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: tokens.colors.navyText, marginBottom: 4 }}>
+              Additional Details (Storage, Expiry, Urgency)
+            </label>
+            <textarea
+              rows={3}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="e.g. Kept in icebox cooler, available for immediate pickup"
+              style={{
+                width: '100%',
+                borderRadius: tokens.radius.chip,
+                border: `1px solid ${tokens.colors.border}`,
+                padding: '10px 12px',
+                fontFamily: 'inherit',
+                boxSizing: 'border-box',
+              }}
+            />
+          </div>
+
+          {/* Buttons */}
+          <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
+            <button
+              type="button"
+              onClick={() => setActiveTab('needs')}
+              style={{
+                flex: 1,
+                minHeight: 48,
+                borderRadius: tokens.radius.chip,
+                backgroundColor: tokens.colors.cardGrey,
+                color: tokens.colors.navyText,
+                border: `1px solid ${tokens.colors.border}`,
+                fontWeight: 700,
+                fontSize: 14,
+                cursor: 'pointer',
+              }}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              style={{
+                flex: 2,
+                minHeight: 48,
+                borderRadius: tokens.radius.button,
+                backgroundColor: postKind === 'NEED' ? tokens.colors.emergencyRed : tokens.colors.successGreen,
+                color: tokens.colors.white,
+                border: 'none',
+                fontWeight: 800,
+                fontSize: 15,
+                cursor: 'pointer',
+                boxShadow: tokens.shadow.active,
+              }}
+            >
+              {isSubmitting ? 'Submitting...' : postKind === 'NEED' ? 'Send Need' : 'Send Offer'}
+            </button>
+          </div>
+        </form>
+      )}
     </div>
   );
 };
+
+export const AddNeedOfferScreen = NeedOfferScreen;

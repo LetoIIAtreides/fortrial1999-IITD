@@ -10,7 +10,9 @@ import {
   AlertTriangle, 
   XCircle, 
   Clock,
-  X
+  X,
+  Check,
+  Plus
 } from 'lucide-react';
 import { api } from '../api/client';
 import { RoadSegment, TransportOption } from '../types';
@@ -212,8 +214,8 @@ export const RoadsTransportScreen: React.FC<RoadsTransportScreenProps> = ({
           alignItems: 'center',
           zIndex: 5
         }}>
-          <div style={{ width: 26, height: 26, borderRadius: 8, background: '#15803d', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 'bold' }}>
-            ✚
+          <div style={{ width: 26, height: 26, borderRadius: 8, background: '#15803d', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Plus size={16} strokeWidth={3} />
           </div>
           <span style={{ fontSize: 10, fontWeight: 800, background: '#ffffff', padding: '1px 6px', borderRadius: 6, marginTop: 2 }}>Town hospital</span>
         </div>
@@ -296,8 +298,8 @@ export const RoadsTransportScreen: React.FC<RoadsTransportScreenProps> = ({
               2 boats at the ghat, 8 seats. About 1 h 20 min.
             </div>
           </div>
-          <span style={{ background: '#dcfce7', color: '#15803d', fontSize: 11, fontWeight: 800, padding: '4px 10px', borderRadius: 20 }}>
-            ✓ Open
+          <span style={{ background: '#dcfce7', color: '#15803d', fontSize: 11, fontWeight: 800, padding: '4px 10px', borderRadius: 20, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+            <Check size={12} strokeWidth={3} /> Open
           </span>
         </div>
 
@@ -322,8 +324,8 @@ export const RoadsTransportScreen: React.FC<RoadsTransportScreenProps> = ({
               Road C has water 0.3 m. About 2 h 10 min. Avoid at night.
             </div>
           </div>
-          <span style={{ background: '#fef3c7', color: '#b45309', fontSize: 11, fontWeight: 800, padding: '4px 10px', borderRadius: 20 }}>
-            ! Risky
+          <span style={{ background: '#fef3c7', color: '#b45309', fontSize: 11, fontWeight: 800, padding: '4px 10px', borderRadius: 20, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+            <AlertTriangle size={12} strokeWidth={3} /> Risky
           </span>
         </div>
 
@@ -348,8 +350,8 @@ export const RoadsTransportScreen: React.FC<RoadsTransportScreenProps> = ({
               Bridge 1 blocked, water 0.8 m. 3 reports, 20 min ago.
             </div>
           </div>
-          <span style={{ background: '#fee2e2', color: '#b91c1c', fontSize: 11, fontWeight: 800, padding: '4px 10px', borderRadius: 20 }}>
-            ✕ Blocked
+          <span style={{ background: '#fee2e2', color: '#b91c1c', fontSize: 11, fontWeight: 800, padding: '4px 10px', borderRadius: 20, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+            <X size={12} strokeWidth={3} /> Blocked
           </span>
         </div>
 
@@ -389,9 +391,12 @@ export const RoadsTransportScreen: React.FC<RoadsTransportScreenProps> = ({
           borderRadius: 10,
           color: '#15803d',
           fontSize: 12,
-          fontWeight: 700
+          fontWeight: 700,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 6
         }}>
-          ✓ Boat request registered on server. Dispatch coordinator notified at Town Ghat.
+          <Check size={16} strokeWidth={2.5} /> Boat request registered on server. Dispatch coordinator notified at Town Ghat.
         </div>
       )}
 
@@ -552,3 +557,5 @@ export const RoadsTransportScreen: React.FC<RoadsTransportScreenProps> = ({
     </div>
   );
 };
+
+export { RoadsTransportScreen as RoadsScreen };

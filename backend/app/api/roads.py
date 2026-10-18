@@ -73,3 +73,35 @@ def create_transport_request(payload: TransportRequestCreate, db: Session = Depe
 @router.get("/transport/requests", response_model=List[TransportRequestResponse])
 def get_transport_requests(db: Session = Depends(get_db)):
     return db.query(TransportRequest).order_by(desc(TransportRequest.created_at)).all()
+
+@router.get("/transport", response_model=List[TransportOptionResponse])
+def get_transport_list(db: Session = Depends(get_db)):
+    return db.query(TransportOption).all()
+
+@router.post("/roads/{road_id}/reports", response_model=RoadResponse)
+def report_road_by_id(road_id: str, payload: RoadReportCreate, db: Session = Depends(get_db)):
+    road = db.query(RoadSegment).filter(RoadSegment.road_id == road_id).first()
+    now = datetime.now(timezone.utc)
+    if not road:
+        road = db.query(RoadSegment).filter(RoadSegment.road_name.ilike(payload.road_name)).first()
+    
+    if road:
+        road.status = payload.status.upper()
+        if payload.hazard_details:
+            road.hazard_details = payload.hazard_details
+        road.last_reported_at = now
+        road.reported_by = payload.reported_by
+    else:
+        road = RoadSegment(
+            road_id=road_id,
+            road_name=payload.road_name,
+            status=payload.status.upper(),
+            hazard_details=payload.hazard_details,
+            last_reported_at=now,
+            reported_by=payload.reported_by
+        )
+        db.add(road)
+    db.commit()
+    db.refresh(road)
+    return road
+
