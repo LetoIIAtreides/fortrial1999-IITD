@@ -18,7 +18,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
-    description="AAROGYA LINK — Online Emergency Healthcare Reporting & Community Response Backend",
+    description="MED-LINK — Online Emergency Healthcare Reporting & Community Response Backend",
     lifespan=lifespan
 )
 

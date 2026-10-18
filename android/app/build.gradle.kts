@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "org.aarogyalink"
+    namespace = "org.medlink"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "org.aarogyalink"
+        applicationId = "org.medlink"
         minSdk = 24
         targetSdk = 36
         versionCode = 1

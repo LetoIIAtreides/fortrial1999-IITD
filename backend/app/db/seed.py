@@ -18,7 +18,7 @@ def seed_database():
             admin_user = User(
                 user_id=str(uuid.uuid4()),
                 username="admin",
-                email="admin@aarogyalink.org",
+                email="admin@medlink.org",
                 hashed_password=get_password_hash("Admin@12345"),
                 role="admin",
                 full_name="Dr. Sanjeev Sharma (Chief Medical Officer)",

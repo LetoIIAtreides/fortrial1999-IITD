@@ -21,7 +21,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onClose, onSuccess }) =>
 
     try {
       const data = await api.login(username, password);
-      localStorage.setItem('aarogya_token', data.access_token);
+      localStorage.setItem('medlink_token', data.access_token);
       onSuccess(data.user);
       onClose();
     } catch (err: any) {
@@ -45,7 +45,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ onClose, onSuccess }) =>
             </div>
             <div>
               <h3 style={{ fontSize: 18, color: '#ffffff' }}>Responder Authentication</h3>
-              <div style={{ fontSize: 12, color: '#94a3b8' }}>AAROGYA LINK Emergency Command</div>
+              <div style={{ fontSize: 12, color: '#94a3b8' }}>MED-LINK Emergency Command</div>
             </div>
           </div>
           <button onClick={onClose} className="btn-secondary" style={{ minHeight: 32, padding: '4px 8px' }}>

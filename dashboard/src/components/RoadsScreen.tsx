@@ -105,7 +105,7 @@ export const RoadsTransportScreen: React.FC<RoadsTransportScreenProps> = ({
             <ArrowLeft size={18} />
           </button>
           <div>
-            <span style={{ fontSize: 10, fontWeight: 800, color: '#16a34a', letterSpacing: 0.5 }}>AAROGYA LINK</span>
+            <span style={{ fontSize: 10, fontWeight: 800, color: '#16a34a', letterSpacing: 0.5 }}>MED-LINK</span>
             <h2 style={{ fontSize: 19, fontWeight: 800, color: '#0f172a' }}>Roads and transport</h2>
           </div>
         </div>

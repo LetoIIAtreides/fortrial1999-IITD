@@ -1,6 +1,6 @@
 
 === PAGE 1 ===
-AAROGYA LINK
+MED-LINK
 Area map
 Online
 All
@@ -90,7 +90,7 @@ Every report is checked before it is marked verified. Repeated false
 reports can get a device blocked.
 
 === PAGE 4 ===
-AAROGYA LINK
+MED-LINK
 Roads and 
 transport
 Sample data
@@ -132,7 +132,7 @@ Request boat
 Report road
 
 === PAGE 5 ===
-AAROGYA LINK Responder console
+MED-LINK Responder console
 District control room
 Sample data
 Online

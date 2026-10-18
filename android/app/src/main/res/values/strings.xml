@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">AAROGYA LINK</string>
+    <string name="app_name">MED-LINK</string>
     <string name="tagline">Share Help. Save Lives.</string>
     <string name="emergency_call_notice">If you have a working phone signal and need urgent help, call 112 first.</string>
     <string name="call_112">Call 112</string>

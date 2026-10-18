@@ -19,5 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "AarogyaLink"
+rootProject.name = "MedLink"
 include(":app")

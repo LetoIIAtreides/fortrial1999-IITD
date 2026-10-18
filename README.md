@@ -1,4 +1,4 @@
-# AAROGYA LINK — Online-First Emergency Healthcare & Community Response Platform
+# MED-LINK — Online-First Emergency Healthcare & Community Response Platform
 
 > **Tagline:** “Share Help. Save Lives.”  
 > **Mission:** Emergency healthcare reporting, status tracking, and authorized responder dispatch coordination for disaster-affected areas (floods, landslides, remote mountain regions).  
@@ -12,9 +12,9 @@
 iiid/
 ├── android/                  # Android Native App (Kotlin, Compose, Room/SQLite, Retrofit, WorkManager)
 │   ├── app/src/main/
-│   │   ├── java/org/aarogyalink/
+│   │   ├── java/org/medlink/
 │   │   │   ├── data/
-│   │   │   │   ├── local/    # SQLite/Room persistent storage (ReportEntity, AarogyaDatabaseHelper)
+│   │   │   │   ├── local/    # SQLite/Room persistent storage (ReportEntity, MedLinkDatabaseHelper)
 │   │   │   │   ├── remote/   # Retrofit 2 REST client, DTOs, OkHttp logging
 │   │   │   │   ├── repository/ # EmergencyReportRepository (Modular transport boundary)
 │   │   │   │   └── sync/     # WorkManager SyncWorker & NetworkMonitor
@@ -23,7 +23,7 @@ iiid/
 │   │   │   │   ├── screens/  # HomeScreen, ReportEmergency, MyReports, Facilities, EmergencyMap, HelpInfo
 │   │   │   │   ├── theme/    # Material 3 theme, accessible typography, color tokens
 │   │   │   │   └── viewmodel/# ReportViewModel (Form, Persistence, TTS), FacilitiesViewModel
-│   │   │   ├── AarogyaApplication.kt
+│   │   │   ├── MedLinkApplication.kt
 │   │   │   └── MainActivity.kt
 │   │   └── res/
 │   │       ├── values/strings.xml (English)
@@ -63,7 +63,7 @@ iiid/
 | **10 Required Functional Screens** | Home, Report Emergency, My Reports, Emergency Map (PDF p.1), Add Need/Offer (PDF p.3), Live Camera (PDF p.2), Roads & Transport (PDF p.4), Facilities, Help & Info, Responder Console (PDF p.5) | **100% IMPLEMENTED & VERIFIED ON EMULATOR** |
 | **Red / Green Visual Language (Sec. 17)** | Red Circle for Needs/Emergencies ("I Need Help"), Green Square for Offers/Resources ("I Can Give Help"), Open/Blocked road indicators | **VERIFIED ON LIVE SCREENS** |
 | **Marker Symbols & Status** | Circle = Need, Square = Offer, Checkmark (`✓`) = Verified, Dashed (`?`) = Unverified, Warning (`!`) = Flagged | **VERIFIED ON EMULATOR & WEB** |
-| **Local Persistence before Network** | SQLite `AarogyaDatabaseHelper` saves reports locally before network request with stable UUID | **VERIFIED** (Flow-reactive updates) |
+| **Local Persistence before Network** | SQLite `MedLinkDatabaseHelper` saves reports locally before network request with stable UUID | **VERIFIED** (Flow-reactive updates) |
 | **Server Idempotence** | Client-generated UUID `report_id` prevents duplicate server records on retry | **VERIFIED** (`test_e2e_flow.py` & pytest) |
 | **FastAPI Backend & DB Persistence** | FastAPI 0.110.0, SQLAlchemy 2.0, Alembic, SQLite / PostgreSQL engine | **VERIFIED** (9/9 pytest tests passed) |
 | **Roads & Transport Subsystem** | `/roads`, `/roads/report`, `/transport/options`, `/transport/request` | **VERIFIED** (Integrated with Map & Dashboard) |

@@ -17,7 +17,7 @@ export const Header: React.FC<HeaderProps> = ({ isOnline, user, onOpenLogin, onL
           <Activity size={28} />
         </div>
         <div>
-          <div className="brand-title">AAROGYA LINK</div>
+          <div className="brand-title">MED-LINK</div>
           <div className="brand-tagline">Share Help. Save Lives. • Operations Center</div>
         </div>
       </div>

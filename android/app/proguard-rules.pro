@@ -1,4 +1,4 @@
-# Proguard rules for AAROGYA LINK
+# Proguard rules for MED-LINK
 -keepclassmembers class * {
     @com.google.gson.annotations.SerializedName <fields>;
 }

@@ -165,7 +165,7 @@ export const EmergencyMapScreen: React.FC<EmergencyMapScreenProps> = ({
       {/* Top Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
         <div>
-          <span style={{ fontSize: 11, fontWeight: 800, color: '#16a34a', letterSpacing: 0.5 }}>AAROGYA LINK</span>
+          <span style={{ fontSize: 11, fontWeight: 800, color: '#16a34a', letterSpacing: 0.5 }}>MED-LINK</span>
           <h2 style={{ fontSize: 22, fontWeight: 800, color: '#0f172a' }}>Area map</h2>
         </div>
         <div style={{

@@ -12,7 +12,7 @@ export const ReportList: React.FC<ReportListProps> = ({ reports, isLoading, onSe
   if (isLoading) {
     return (
       <div className="glass-panel" style={{ padding: 48, textAlign: 'center', color: '#94a3b8' }}>
-        <div style={{ fontSize: 16, marginBottom: 8 }}>Fetching live reports from AAROGYA LINK backend...</div>
+        <div style={{ fontSize: 16, marginBottom: 8 }}>Fetching live reports from MED-LINK backend...</div>
         <div style={{ fontSize: 13, color: '#64748b' }}>Querying verified database records</div>
       </div>
     );

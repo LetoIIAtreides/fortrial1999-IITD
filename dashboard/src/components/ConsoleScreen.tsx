@@ -233,7 +233,7 @@ export const ResponderConsoleScreen: React.FC<ResponderConsoleScreenProps> = ({
           </button>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontSize: 11, fontWeight: 800, color: '#22c55e', letterSpacing: 0.5 }}>AAROGYA LINK</span>
+              <span style={{ fontSize: 11, fontWeight: 800, color: '#22c55e', letterSpacing: 0.5 }}>MED-LINK</span>
               <span style={{ fontSize: 16, fontWeight: 800, color: '#ffffff' }}>Responder console</span>
             </div>
             <div style={{ fontSize: 11, color: '#94a3b8' }}>District control room</div>

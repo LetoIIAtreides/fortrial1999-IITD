@@ -17,7 +17,7 @@ def health_check(db: Session = Depends(get_db)):
     
     return {
         "status": "healthy" if "unhealthy" not in db_status else "degraded",
-        "service": "AAROGYA LINK API",
+        "service": "MED-LINK API",
         "database": db_status,
         "database_engine": db_dialect,
         "timestamp": datetime.now(timezone.utc).isoformat()

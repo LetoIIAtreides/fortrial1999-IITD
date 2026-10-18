@@ -1,4 +1,4 @@
-# AAROGYA LINK — Comprehensive Audit & Implementation Report
+# MED-LINK — Comprehensive Audit & Implementation Report
 
 ## 1. System Overview & Completed Scope
 - **Workspace:** `c:\Users\Rajendra\Desktop\iiid`
@@ -10,7 +10,7 @@
   - Online-only implementation (no fake Bluetooth, BLE, or DisasterMesh dependencies).
   - Preserved existing project structure, models, and home screen layout.
   - Implemented the complete 10 functional screens requested by the specification.
-  - Applied the Red/Green visual language from `Aarogya Link Online Map.pdf`.
+  - Applied the Red/Green visual language from `MED-LINK Online Map.pdf`.
 
 ---
 

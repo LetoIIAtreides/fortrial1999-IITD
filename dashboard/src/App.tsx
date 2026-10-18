@@ -77,7 +77,7 @@ export const App: React.FC = () => {
   // Local Persistent Reports & Backend Data
   const [localReports, setLocalReports] = useState<EmergencyReport[]>(() => {
     try {
-      const saved = localStorage.getItem('aarogya_local_reports');
+      const saved = localStorage.getItem('medlink_local_reports');
       return saved ? JSON.parse(saved) : [];
     } catch {
       return [];
@@ -96,7 +96,7 @@ export const App: React.FC = () => {
   // Save reports to localStorage
   useEffect(() => {
     try {
-      localStorage.setItem('aarogya_local_reports', JSON.stringify(localReports));
+      localStorage.setItem('medlink_local_reports', JSON.stringify(localReports));
     } catch {}
   }, [localReports]);
 
@@ -265,7 +265,7 @@ export const App: React.FC = () => {
             <HeartPulse size={24} />
           </div>
           <div>
-            <div className="brand-title-text">AAROGYA LINK</div>
+            <div className="brand-title-text">MED-LINK</div>
             <div className="brand-tagline-text">
               {lang === 'hi' ? 'मदद साझा करें। जीवन बचाएं।' : 'Share Help. Save Lives.'}
             </div>
@@ -277,8 +277,8 @@ export const App: React.FC = () => {
             onClick={() =>
               speak(
                 lang === 'hi'
-                  ? 'आरोग्य लिंक। आपातकालीन स्वास्थ्य रिपोर्टिंग और सहायता पोर्टल।'
-                  : 'Aarogya Link. Emergency healthcare reporting and response portal.'
+                  ? 'मेड-लिंक। आपातकालीन स्वास्थ्य रिपोर्टिंग और सहायता पोर्टल।'
+                  : 'MED-LINK. Emergency healthcare reporting and response portal.'
               )
             }
             className="tts-btn"
@@ -647,7 +647,7 @@ export const App: React.FC = () => {
 
             <p style={{ fontSize: 13, color: '#64748b', marginTop: 6, lineHeight: 1.5 }}>
               {submissionSuccess
-                ? 'Your emergency report has been confirmed by the Aarogya Link server. Authorized responders in your sector have been alerted.'
+                ? 'Your emergency report has been confirmed by the MED-LINK server. Authorized responders in your sector have been alerted.'
                 : 'Could not connect to the server. Your report is preserved locally and will retry transmission when connectivity is restored.'}
             </p>
 

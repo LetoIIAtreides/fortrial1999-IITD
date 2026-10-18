@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">आरोग्य लिंक</string>
+    <string name="app_name">मेड-लिंक</string>
     <string name="tagline">मदद साझा करें। जीवन बचाएं।</string>
     <string name="emergency_call_notice">यदि आपके पास फोन सिग्नल है और तुरंत मदद चाहिए, तो पहले 112 पर कॉल करें।</string>
     <string name="call_112">112 पर कॉल करें</string>

@@ -7,7 +7,7 @@ import os
 BASE_URL = "http://localhost:8000"
 
 def run_e2e_test():
-    print("=== STARTING AAROGYA LINK END-TO-END VERIFICATION TEST ===")
+    print("=== STARTING MED-LINK END-TO-END VERIFICATION TEST ===")
     
     # 1. Health check
     print("\n1. Testing Backend Health Endpoint...")

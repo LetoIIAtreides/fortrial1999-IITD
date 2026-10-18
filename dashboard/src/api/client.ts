@@ -13,7 +13,7 @@ import {
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
 function getAuthHeaders(): HeadersInit {
-  const token = localStorage.getItem('aarogya_token');
+  const token = localStorage.getItem('medlink_token');
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
   };
