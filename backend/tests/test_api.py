@@ -1,6 +1,17 @@
+import atexit
+import os
+import tempfile
+import uuid
+
+# Keep API tests isolated from the application's local development database.
+TEST_DB_PATH = os.path.join(tempfile.gettempdir(), f"medlink-test-{uuid.uuid4().hex}.db")
+os.environ["DATABASE_URL"] = os.environ.get(
+    "MEDLINK_TEST_DATABASE_URL",
+    f"sqlite:///{TEST_DB_PATH.replace(os.sep, '/')}",
+)
+
 import pytest
 from fastapi.testclient import TestClient
-import uuid
 from main import app
 from app.db.session import engine, Base
 from app.db.seed import seed_database
@@ -11,6 +22,21 @@ Base.metadata.create_all(bind=engine)
 seed_database()
 
 client = TestClient(app)
+
+def _remove_test_database():
+    engine.dispose()
+    if os.path.exists(TEST_DB_PATH):
+        os.remove(TEST_DB_PATH)
+
+atexit.register(_remove_test_database)
+
+def responder_headers():
+    response = client.post(
+        "/auth/login",
+        json={"username": "responder_ravi", "password": "Responder@12345"},
+    )
+    assert response.status_code == 200
+    return {"Authorization": f"Bearer {response.json()['access_token']}"}
 
 def test_health_check():
     response = client.get("/health")
@@ -48,7 +74,8 @@ def test_create_report_and_idempotence():
     assert data2["report_id"] == test_id
 
 def test_list_and_filter_reports():
-    res = client.get("/reports?page=1&page_size=10")
+    assert client.get("/reports?page=1&page_size=10").status_code == 401
+    res = client.get("/reports?page=1&page_size=10", headers=responder_headers())
     assert res.status_code == 200
     data = res.json()
     assert "items" in data
@@ -56,7 +83,8 @@ def test_list_and_filter_reports():
     assert data["total"] >= 1
 
 def test_get_report_by_id():
-    res = client.get("/reports/rep-demo-001")
+    assert client.get("/reports/rep-demo-001").status_code == 401
+    res = client.get("/reports/rep-demo-001", headers=responder_headers())
     assert res.status_code == 200
     data = res.json()
     assert data["report_id"] == "rep-demo-001"
@@ -177,11 +205,53 @@ def test_roads_and_transport():
     assert req_res.json()["status"] == "REQUESTED"
 
 def test_dashboard_summary():
-    res = client.get("/dashboard/summary")
+    assert client.get("/dashboard/summary").status_code == 401
+    res = client.get("/dashboard/summary", headers=responder_headers())
     assert res.status_code == 200
     data = res.json()
     assert "open_requests" in data
     assert "needs_count" in data
     assert "offers_count" in data
     assert "verified_count" in data
-    assert data["affected_area_km2"] == 2.4
+    assert data["sample_note"] == "Affected area and impact zone are not calculated from current reports."
+
+def test_heatmap_requires_responder_and_returns_expected_shape():
+    assert client.get("/dashboard/heatmap").status_code == 401
+    res = client.get("/dashboard/heatmap", headers=responder_headers())
+    assert res.status_code == 200
+    data = res.json()
+    assert {"cells", "facilities", "victim_people_total", "unlocated_reports", "privacy_note"} <= data.keys()
+    if data["cells"]:
+        cell = data["cells"][0]
+        assert {"latitude", "longitude", "victim_people", "categories"} <= cell.keys()
+
+def test_heatmap_does_not_offset_needs_with_unrelated_offer_categories():
+    coordinates = {"latitude": 20.0, "longitude": 70.0, "people_affected": 2}
+    need_id = f"heatmap-need-{uuid.uuid4()}"
+    offer_id = f"heatmap-offer-{uuid.uuid4()}"
+    need = client.post("/reports", json={
+        **coordinates,
+        "report_id": need_id,
+        "report_type": "NEED",
+        "emergency_type": "Insulin",
+        "urgency": "High",
+    })
+    offer = client.post("/reports", json={
+        **coordinates,
+        "report_id": offer_id,
+        "report_type": "OFFER",
+        "emergency_type": "Food",
+        "urgency": "Low",
+    })
+    assert need.status_code == 201
+    assert offer.status_code == 201
+
+    response = client.get("/dashboard/heatmap", headers=responder_headers())
+    assert response.status_code == 200
+    cell = next(
+        cell for cell in response.json()["cells"]
+        if abs(cell["latitude"] - 20.0) < 0.01 and abs(cell["longitude"] - 70.0) < 0.01
+    )
+    assert cell["victim_people"] == 2
+    assert cell["rescuer_units"] == 2
+    assert cell["supply_gap"] == 2

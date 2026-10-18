@@ -184,3 +184,50 @@ class DashboardSummaryResponse(BaseModel):
     affected_area_km2: float
     impact_zone: str
     sample_note: str
+
+
+class HeatmapCategorySplit(BaseModel):
+    category: str
+    victim_people: int
+    victim_reports: int
+    rescuer_units: int
+    rescuer_reports: int
+    supply_gap: int
+
+
+class HeatmapCell(BaseModel):
+    cell_id: str
+    latitude: float
+    longitude: float
+    victim_people: int
+    victim_reports: int
+    rescuer_units: int
+    rescuer_reports: int
+    supply_gap: int
+    flagged_reports: int
+    top_category: Optional[str] = None
+    categories: List[HeatmapCategorySplit]
+    recommended_action: str
+
+
+class HeatmapFacility(BaseModel):
+    facility_id: str
+    name: str
+    facility_type: str
+    latitude: float
+    longitude: float
+    is_operational: bool
+
+
+class HeatmapResponse(BaseModel):
+    cells: List[HeatmapCell]
+    facilities: List[HeatmapFacility]
+    reports_with_location: int
+    unlocated_reports: int
+    victim_people_total: int
+    rescuer_units_total: int
+    grid_size_meters: int
+    last_updated: datetime
+    privacy_note: str
+    sample_note: str
+    contains_demo_data: bool

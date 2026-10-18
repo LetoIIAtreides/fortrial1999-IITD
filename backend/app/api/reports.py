@@ -82,8 +82,10 @@ def list_reports(
     search: Optional[str] = Query(None, description="Search in description or location"),
     page: int = Query(1, ge=1, description="Page number"),
     page_size: int = Query(50, ge=1, le=100, description="Page size"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_responder),
 ):
+    del current_user  # report locations and health details are responder-only
     query = db.query(Report)
     
     if category:
@@ -122,7 +124,12 @@ def list_reports(
     }
 
 @router.get("/{report_id}", response_model=ReportResponse)
-def get_report(report_id: str, db: Session = Depends(get_db)):
+def get_report(
+    report_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_responder),
+):
+    del current_user  # report locations and health details are responder-only
     report = db.query(Report).filter(Report.report_id == report_id).first()
     if not report:
         raise HTTPException(

@@ -8,6 +8,7 @@ import {
   TransportOption,
   TransportRequest,
   DashboardSummary,
+  HeatmapResponse,
 } from '../types';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
@@ -203,6 +204,26 @@ export const api = {
   async getDashboardSummary(): Promise<DashboardSummary> {
     const res = await fetch(`${API_BASE}/dashboard/summary`);
     if (!res.ok) throw new Error('Failed to fetch dashboard summary');
+    return res.json();
+  },
+
+  async getHeatmap(params?: {
+    category?: string;
+    urgency?: string;
+    hide_flagged?: boolean;
+    include_resolved?: boolean;
+  }): Promise<HeatmapResponse> {
+    const query = new URLSearchParams();
+    if (params?.category) query.append('category', params.category);
+    if (params?.urgency) query.append('urgency', params.urgency);
+    if (params?.hide_flagged) query.append('hide_flagged', 'true');
+    if (params?.include_resolved) query.append('include_resolved', 'true');
+    const url = `${API_BASE}/dashboard/heatmap${query.toString() ? '?' + query.toString() : ''}`;
+    const res = await fetch(url, { headers: getAuthHeaders() });
+    if (res.status === 401 || res.status === 403) {
+      throw new Error('Responder login is required to view the supply heatmap.');
+    }
+    if (!res.ok) throw new Error('Failed to fetch heatmap');
     return res.json();
   },
 };

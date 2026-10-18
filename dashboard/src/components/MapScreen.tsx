@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   ArrowLeft, 
   MapPin, 
@@ -38,13 +38,34 @@ export const EmergencyMapScreen: React.FC<EmergencyMapScreenProps> = ({
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
 
-  // Set default selected report to Insulin needed or first report
+  const filteredReports = useMemo(() => reports.filter((report) => {
+    if (filter === 'needs') return (report.report_type || 'NEED') === 'NEED';
+    if (filter === 'offers') return report.report_type === 'OFFER';
+    return true; // 'all' or 'roads'
+  }), [filter, reports]);
+  const visibleSelectedReport = filteredReports.find(
+    (report) => report.report_id === selectedReport?.report_id,
+  ) ?? filteredReports[0] ?? null;
+
+  // Keep the details card on a report that belongs to the active filter.
   useEffect(() => {
-    if (reports.length > 0 && !selectedReport) {
-      const insulinNeed = reports.find(r => r.emergency_type.toLowerCase().includes('insulin') && r.report_type === 'NEED');
-      setSelectedReport(insulinNeed || reports[0]);
+    const selectionIsVisible = filteredReports.some(
+      (report) => report.report_id === selectedReport?.report_id,
+    );
+    if (selectionIsVisible) return;
+
+    if (filteredReports.length === 0) {
+      setSelectedReport(null);
+      return;
     }
-  }, [reports, selectedReport]);
+
+    const initialInsulinNeed = !selectedReport && filter === 'all'
+      ? filteredReports.find(
+          (report) => report.emergency_type.toLowerCase().includes('insulin') && report.report_type === 'NEED',
+        )
+      : undefined;
+    setSelectedReport(initialInsulinNeed || filteredReports[0]);
+  }, [filter, filteredReports, selectedReport]);
 
   // Initialize and update Leaflet Map
   useEffect(() => {
@@ -61,58 +82,24 @@ export const EmergencyMapScreen: React.FC<EmergencyMapScreenProps> = ({
         maxZoom: 18,
       }).addTo(map);
 
-      // Add High Impact Probability Zone (Reddish concentric circle ~2.4 km²)
-      L.circle([30.556, 79.567], {
-        radius: 600,
-        color: '#dc2626',
-        fillColor: '#ef4444',
-        fillOpacity: 0.35,
-        weight: 1.5,
-      }).addTo(map);
-
-      // Medium Zone (Amber)
-      L.circle([30.556, 79.567], {
-        radius: 1100,
-        color: '#f59e0b',
-        fillColor: '#fbbf24',
-        fillOpacity: 0.18,
-        weight: 1,
-      }).addTo(map);
-
-      // Outer Low Zone (Light dashed blue/green)
-      L.circle([30.556, 79.567], {
-        radius: 1700,
-        color: '#3b82f6',
-        fillColor: '#60a5fa',
-        fillOpacity: 0.08,
-        weight: 1.5,
-        dashArray: '5, 8',
-      }).addTo(map);
-
       mapInstanceRef.current = map;
     }
 
     const map = mapInstanceRef.current;
     if (!map) return;
 
-    // Clear existing report markers (keep base tile & zones)
+    // Clear report markers while keeping the base map.
     map.eachLayer((layer) => {
       if (layer instanceof L.Marker) {
         map.removeLayer(layer);
       }
     });
 
-    // Filter reports based on active tab
-    const filteredReports = reports.filter((r) => {
-      if (filter === 'needs') return (r.report_type || 'NEED') === 'NEED';
-      if (filter === 'offers') return r.report_type === 'OFFER';
-      return true; // 'all' or 'roads'
-    });
-
     // Add Markers with distinct Red Circle (Need) and Green Square (Offer)
     filteredReports.forEach((rep) => {
-      const lat = rep.latitude || (30.556 + (Math.random() - 0.5) * 0.015);
-      const lng = rep.longitude || (79.567 + (Math.random() - 0.5) * 0.015);
+      if (rep.latitude == null || rep.longitude == null) return;
+      const lat = rep.latitude;
+      const lng = rep.longitude;
 
       const isNeed = (rep.report_type || 'NEED') === 'NEED';
       const isVerified = rep.verification_status === 'VERIFIED';
@@ -167,6 +154,11 @@ export const EmergencyMapScreen: React.FC<EmergencyMapScreenProps> = ({
         <div>
           <span style={{ fontSize: 11, fontWeight: 800, color: '#16a34a', letterSpacing: 0.5 }}>MED-LINK</span>
           <h2 style={{ fontSize: 22, fontWeight: 800, color: '#0f172a' }}>Area map</h2>
+          {reports.some((report) => report.report_id.startsWith('rep-demo-')) && (
+            <span style={{ fontSize: 11, fontWeight: 700, color: '#92400e' }}>
+              Includes demonstration reports
+            </span>
+          )}
         </div>
         <div style={{
           display: 'flex',
@@ -219,51 +211,43 @@ export const EmergencyMapScreen: React.FC<EmergencyMapScreenProps> = ({
       <div style={{ position: 'relative', width: '100%', height: 350, borderRadius: 16, overflow: 'hidden', border: '1px solid #e2e8f0', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
         <div ref={mapContainerRef} style={{ width: '100%', height: '100%' }} />
 
-        {/* Impact Probability Legend */}
+        {/* Report marker legend */}
         <div className="impact-overlay-card">
-          <div style={{ fontWeight: 800, fontSize: 11, marginBottom: 4, color: '#0f172a' }}>Impact probability</div>
+          <div style={{ fontWeight: 800, fontSize: 11, marginBottom: 4, color: '#0f172a' }}>Map markers</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: '#334155' }}>
-              <span style={{ width: 10, height: 10, borderRadius: 2, background: '#dc2626' }} /> High
+              <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#dc2626' }} /> Needs
             </span>
             <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: '#334155' }}>
-              <span style={{ width: 10, height: 10, borderRadius: 2, background: '#f59e0b' }} /> Medium
-            </span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: '#334155' }}>
-              <span style={{ width: 10, height: 10, borderRadius: 2, background: '#eab308' }} /> Low
+              <span style={{ width: 10, height: 10, borderRadius: 2, background: '#15803d' }} /> Offers
             </span>
           </div>
-          <div style={{ fontSize: 10, color: '#64748b', marginTop: 4, borderTop: '1px solid #f1f5f9', paddingTop: 3 }}>
-            ● Circle = need<br />■ Square = offer
+        </div>
+        {reports.some((report) => report.latitude == null || report.longitude == null) && (
+          <div className="heatmap-empty" style={{ bottom: 12, top: 'auto' }}>
+            Reports without coordinates are not shown on this map.
           </div>
-        </div>
-
-        {/* Affected Area Indicator */}
-        <div className="affected-area-badge">
-          <div style={{ fontSize: 10, color: '#64748b', fontWeight: 600 }}>Estimated affected area</div>
-          <div style={{ fontSize: 17, fontWeight: 900, color: '#0f172a' }}>~2.4 km²</div>
-          <div style={{ fontSize: 9, color: '#94a3b8' }}>AI estimate. Sample data.</div>
-        </div>
+        )}
       </div>
 
       {/* Bottom Selected Incident Details Card */}
-      {selectedReport && (
+      {visibleSelectedReport ? (
         <div className="map-selected-card">
           <div className="map-selected-header">
-            <div className={`selected-cat-icon ${(selectedReport.report_type || 'NEED') === 'NEED' ? 'need' : 'offer'}`}>
-              {(selectedReport.report_type || 'NEED') === 'NEED' ? '💧' : '■'}
+            <div className={`selected-cat-icon ${(visibleSelectedReport.report_type || 'NEED') === 'NEED' ? 'need' : 'offer'}`}>
+              {(visibleSelectedReport.report_type || 'NEED') === 'NEED' ? '💧' : '■'}
             </div>
             <div style={{ flex: 1 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <h3 style={{ fontSize: 16, fontWeight: 800, color: '#0f172a' }}>
-                  {selectedReport.emergency_type} {((selectedReport.report_type || 'NEED') === 'NEED' && !selectedReport.emergency_type.toLowerCase().includes('needed')) ? 'needed' : ''}
+                  {visibleSelectedReport.emergency_type} {((visibleSelectedReport.report_type || 'NEED') === 'NEED' && !visibleSelectedReport.emergency_type.toLowerCase().includes('needed')) ? 'needed' : ''}
                 </h3>
-                <span className={`badge-pill ${selectedReport.urgency.toLowerCase()}`}>
-                  {selectedReport.urgency}
+                <span className={`badge-pill ${visibleSelectedReport.urgency.toLowerCase()}`}>
+                  {visibleSelectedReport.urgency}
                 </span>
               </div>
               <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>
-                {selectedReport.location_name || `${selectedReport.ward || 'Ward 4'} · 3 reports within 200 m · 1 live photo`}
+                {visibleSelectedReport.location_name || visibleSelectedReport.ward || 'Location not provided'} · {new Date(visibleSelectedReport.created_at).toLocaleString()}
               </div>
             </div>
           </div>
@@ -275,10 +259,10 @@ export const EmergencyMapScreen: React.FC<EmergencyMapScreenProps> = ({
               padding: '3px 8px',
               borderRadius: 6,
               background: '#f8fafc',
-              border: selectedReport.verification_status === 'VERIFIED' ? '1px solid #16a34a' : '1px dashed #64748b',
-              color: selectedReport.verification_status === 'VERIFIED' ? '#15803d' : '#475569'
+              border: visibleSelectedReport.verification_status === 'VERIFIED' ? '1px solid #16a34a' : '1px dashed #64748b',
+              color: visibleSelectedReport.verification_status === 'VERIFIED' ? '#15803d' : '#475569'
             }}>
-              {selectedReport.verification_status === 'VERIFIED' ? '✓ Verified' : 'Unverified'}
+              {visibleSelectedReport.verification_status === 'VERIFIED' ? '✓ Verified' : visibleSelectedReport.verification_status}
             </span>
             <span style={{
               fontSize: 11,
@@ -289,14 +273,14 @@ export const EmergencyMapScreen: React.FC<EmergencyMapScreenProps> = ({
               color: '#065f46',
               border: '1px solid #a7f3d0'
             }}>
-              {selectedReport.ai_check_status || 'AI check: likely genuine'}
+              {visibleSelectedReport.ai_check_status || 'No automated assessment'}
             </span>
           </div>
 
           {/* Action Buttons: Green "I can help" & White "Details" */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
             <button
-              onClick={() => onOfferHelp(selectedReport)}
+              onClick={() => onOfferHelp(visibleSelectedReport)}
               style={{
                 height: 44,
                 background: '#15803d',
@@ -314,7 +298,7 @@ export const EmergencyMapScreen: React.FC<EmergencyMapScreenProps> = ({
               <HeartHandshake size={16} /> I can help
             </button>
             <button
-              onClick={() => onSelectReportForDetails(selectedReport)}
+              onClick={() => onSelectReportForDetails(visibleSelectedReport)}
               style={{
                 height: 44,
                 background: '#ffffff',
@@ -331,6 +315,10 @@ export const EmergencyMapScreen: React.FC<EmergencyMapScreenProps> = ({
               Details
             </button>
           </div>
+        </div>
+      ) : (
+        <div className="map-selected-card" role="status">
+          No {filter === 'offers' ? 'offers' : filter === 'needs' ? 'needs' : 'reports'} match this filter.
         </div>
       )}
     </div>

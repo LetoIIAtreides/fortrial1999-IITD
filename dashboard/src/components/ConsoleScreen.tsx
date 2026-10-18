@@ -1,45 +1,52 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { 
-  ArrowLeft, 
-  CheckCircle2, 
-  AlertTriangle, 
-  XCircle, 
-  ShieldCheck, 
-  UserCheck, 
-  Filter, 
-  Eye, 
-  Lock,
-  MessageSquare,
-  HelpCircle,
-  ExternalLink
-} from 'lucide-react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { ArrowLeft } from 'lucide-react';
 import L from 'leaflet';
 import { api } from '../api/client';
-import { EmergencyReport, DashboardSummary, UserProfile } from '../types';
+import { EmergencyReport, UserProfile } from '../types';
 
 interface ResponderConsoleScreenProps {
   reports: EmergencyReport[];
+  reportsError?: string | null;
   user: UserProfile | null;
   onNavigateHome: () => void;
   onLoginClick: () => void;
+  onOpenHeatmap?: () => void;
 }
 
 export const ResponderConsoleScreen: React.FC<ResponderConsoleScreenProps> = ({
   reports,
+  reportsError,
   user,
   onNavigateHome,
   onLoginClick,
+  onOpenHeatmap,
 }) => {
-  const [summary, setSummary] = useState<DashboardSummary | null>(null);
   const [selectedReport, setSelectedReport] = useState<EmergencyReport | null>(null);
   const [actionNotes, setActionNotes] = useState<string>('');
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
+  const locatedReports = reports.filter(
+    (report) => report.latitude != null && report.longitude != null
+  );
+  const sortedReports = useMemo(() => {
+    const urgencyRank: Record<string, number> = {
+      Critical: 5,
+      Urgent: 4,
+      High: 3,
+      Medium: 2,
+      Low: 1,
+      'Can wait': 0,
+    };
+    return [...reports].sort(
+      (a, b) =>
+        (urgencyRank[b.urgency] ?? 0) - (urgencyRank[a.urgency] ?? 0) ||
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    );
+  }, [reports]);
 
-  // Load summary and pick first report
+  // Pick the first available report when the queue changes.
   useEffect(() => {
-    api.getDashboardSummary().then(setSummary).catch(() => {});
     if (reports.length > 0 && !selectedReport) {
       const insulinNeed = reports.find(r => r.emergency_type.toLowerCase().includes('insulin'));
       setSelectedReport(insulinNeed || reports[0]);
@@ -60,34 +67,6 @@ export const ResponderConsoleScreen: React.FC<ResponderConsoleScreenProps> = ({
         maxZoom: 18,
       }).addTo(map);
 
-      // High zone
-      L.circle([30.556, 79.567], {
-        radius: 600,
-        color: '#dc2626',
-        fillColor: '#ef4444',
-        fillOpacity: 0.35,
-        weight: 1.5,
-      }).addTo(map);
-
-      // Medium zone
-      L.circle([30.556, 79.567], {
-        radius: 1100,
-        color: '#f59e0b',
-        fillColor: '#fbbf24',
-        fillOpacity: 0.2,
-        weight: 1,
-      }).addTo(map);
-
-      // Low zone
-      L.circle([30.556, 79.567], {
-        radius: 1700,
-        color: '#3b82f6',
-        fillColor: '#60a5fa',
-        fillOpacity: 0.1,
-        weight: 1.5,
-        dashArray: '5, 8',
-      }).addTo(map);
-
       mapInstanceRef.current = map;
     }
 
@@ -101,9 +80,9 @@ export const ResponderConsoleScreen: React.FC<ResponderConsoleScreenProps> = ({
       }
     });
 
-    reports.forEach((rep) => {
-      const lat = rep.latitude || (30.556 + (Math.random() - 0.5) * 0.015);
-      const lng = rep.longitude || (79.567 + (Math.random() - 0.5) * 0.015);
+    locatedReports.forEach((rep) => {
+      const lat = rep.latitude as number;
+      const lng = rep.longitude as number;
       const isNeed = (rep.report_type || 'NEED') === 'NEED';
       const isVerified = rep.verification_status === 'VERIFIED';
       const isFlagged = rep.verification_status === 'FLAGGED' || !!rep.flagged_reason;
@@ -138,6 +117,12 @@ export const ResponderConsoleScreen: React.FC<ResponderConsoleScreenProps> = ({
         setSelectedReport(rep);
       });
     });
+    if (locatedReports.length > 0) {
+      map.fitBounds(
+        locatedReports.map((report) => [report.latitude as number, report.longitude as number]),
+        { padding: [24, 24], maxZoom: 14 }
+      );
+    }
   }, [reports]);
 
   // Actions
@@ -242,12 +227,27 @@ export const ResponderConsoleScreen: React.FC<ResponderConsoleScreenProps> = ({
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <span style={{ background: '#1e293b', color: '#cbd5e1', fontSize: 11, fontWeight: 700, padding: '4px 10px', borderRadius: 20 }}>
-            Sample data
+            {reports.some((report) => report.report_id.startsWith('rep-demo-')) ? 'Includes demo reports' : 'Live reports'}
           </span>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#14532d', color: '#86efac', fontSize: 11, fontWeight: 700, padding: '4px 10px', borderRadius: 20 }}>
             <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#22c55e' }} /> Online
           </div>
 
+          {onOpenHeatmap && (
+            <button
+              onClick={onOpenHeatmap}
+              style={{
+                background: '#7f1d1d',
+                color: '#fecaca',
+                padding: '6px 12px',
+                borderRadius: 8,
+                fontSize: 12,
+                fontWeight: 700,
+              }}
+            >
+              Supply heatmap
+            </button>
+          )}
           {!user ? (
             <button
               onClick={onLoginClick}
@@ -282,7 +282,17 @@ export const ResponderConsoleScreen: React.FC<ResponderConsoleScreenProps> = ({
           </div>
 
           <div className="queue-items-scroll">
-            {reports.map((rep) => {
+            {reportsError && (
+              <div role="alert" style={{ padding: 12, color: '#b91c1c', background: '#fef2f2', borderRadius: 8 }}>
+                {reportsError}
+              </div>
+            )}
+            {!reportsError && reports.length === 0 && (
+              <div style={{ padding: 16, color: '#64748b' }}>
+                {user ? 'No reports are available.' : 'Sign in as a responder to review reports.'}
+              </div>
+            )}
+            {sortedReports.map((rep) => {
               const isSelected = selectedReport?.report_id === rep.report_id;
               const isNeed = (rep.report_type || 'NEED') === 'NEED';
               const isFlagged = rep.verification_status === 'FLAGGED' || !!rep.flagged_reason;
@@ -332,7 +342,7 @@ export const ResponderConsoleScreen: React.FC<ResponderConsoleScreenProps> = ({
                       </div>
 
                       <div style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>
-                        {rep.location_name || `${rep.ward || 'Ward 4'} · 12 min ago`}
+                        {rep.location_name || rep.ward || 'Location not provided'} · {new Date(rep.created_at).toLocaleString()}
                       </div>
 
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 6 }}>
@@ -344,10 +354,10 @@ export const ResponderConsoleScreen: React.FC<ResponderConsoleScreenProps> = ({
                           background: isVerified ? '#dcfce7' : (isFlagged ? '#fee2e2' : '#f1f5f9'),
                           color: isVerified ? '#15803d' : (isFlagged ? '#b91c1c' : '#475569')
                         }}>
-                          {isVerified ? '✓ Verified' : (isFlagged ? '! Flagged' : `Trust ${rep.trust_score || 78}`)}
+                          {isVerified ? '✓ Verified' : (isFlagged ? '! Flagged' : rep.verification_status)}
                         </span>
                         <span style={{ fontSize: 10, color: '#94a3b8' }}>
-                          {rep.ai_check_status || 'Likely genuine'}
+                          {rep.ai_check_status || 'No automated assessment'}
                         </span>
                       </div>
                     </div>
@@ -380,28 +390,11 @@ export const ResponderConsoleScreen: React.FC<ResponderConsoleScreenProps> = ({
           <div style={{ position: 'relative', flex: 1, minHeight: 400 }}>
             <div ref={mapContainerRef} style={{ width: '100%', height: '100%' }} />
 
-            {/* Impact Probability Overlay */}
-            <div className="impact-overlay-card">
-              <div style={{ fontWeight: 800, fontSize: 11, marginBottom: 4, color: '#0f172a' }}>Impact probability</div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: '#334155' }}>
-                  <span style={{ width: 10, height: 10, borderRadius: 2, background: '#dc2626' }} /> High
-                </span>
-                <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: '#334155' }}>
-                  <span style={{ width: 10, height: 10, borderRadius: 2, background: '#f59e0b' }} /> Med
-                </span>
-                <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: '#334155' }}>
-                  <span style={{ width: 10, height: 10, borderRadius: 2, background: '#eab308' }} /> Low
-                </span>
+            {reports.length > locatedReports.length && (
+              <div className="heatmap-empty" style={{ bottom: 12, top: 'auto' }}>
+                {reports.length - locatedReports.length} reports have no coordinates and are not shown on this map.
               </div>
-            </div>
-
-            {/* Estimated Affected Area Overlay */}
-            <div className="affected-area-badge">
-              <div style={{ fontSize: 10, color: '#64748b', fontWeight: 600 }}>Estimated affected area</div>
-              <div style={{ fontSize: 16, fontWeight: 900, color: '#0f172a' }}>~2.4 km²</div>
-              <div style={{ fontSize: 9, color: '#94a3b8' }}>(AI estimate)</div>
-            </div>
+            )}
           </div>
 
           <div style={{ padding: '8px 14px', background: '#f8fafc', borderTop: '1px solid #e2e8f0', fontSize: 11, color: '#64748b' }}>
@@ -434,105 +427,18 @@ export const ResponderConsoleScreen: React.FC<ResponderConsoleScreenProps> = ({
                     {selectedReport.emergency_type} {((selectedReport.report_type || 'NEED') === 'NEED' && !selectedReport.emergency_type.toLowerCase().includes('needed')) ? 'needed' : ''}
                   </h3>
                   <div style={{ fontSize: 11, color: '#64748b' }}>
-                    {selectedReport.people_affected || 3} people · {selectedReport.urgency} · {selectedReport.ward || 'Ward 4'} · {selectedReport.device_fingerprint || 'device ending 4F2'}
+                    {selectedReport.people_affected ?? 'Population not provided'} people · {selectedReport.urgency} · {selectedReport.ward || selectedReport.location_name || 'Location not provided'} · {new Date(selectedReport.created_at).toLocaleString()}
                   </div>
                 </div>
               </div>
 
-              {/* Photo Evidence with Waterline Mockup */}
-              <div style={{
-                background: '#334155',
-                borderRadius: 12,
-                height: 120,
-                position: 'relative',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#cbd5e1',
-                overflow: 'hidden',
-                marginBottom: 14
-              }}>
-                <div style={{
-                  width: 90,
-                  height: 70,
-                  border: '1.5px dashed #f59e0b',
-                  borderRadius: 6,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: 28
-                }}>
-                  🏠
-                </div>
-                <div style={{
-                  position: 'absolute',
-                  top: '55%',
-                  left: 0,
-                  right: 0,
-                  borderTop: '1px dashed #ffffff',
-                  display: 'flex',
-                  justifyContent: 'center'
-                }} />
-                <span style={{ position: 'absolute', bottom: 6, left: 10, fontSize: 10, color: '#e2e8f0', background: 'rgba(0,0,0,0.6)', padding: '2px 6px', borderRadius: 4 }}>
-                  Live photo, 09:14. Example image.
-                </span>
-              </div>
-
-              {/* Verification Checks Checklist */}
-              <div style={{ marginBottom: 14 }}>
-                <div style={{ fontSize: 12, fontWeight: 800, color: '#0f172a', marginBottom: 6 }}>Verification checks</div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: 12 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#15803d' }}>
-                    <CheckCircle2 size={16} /> Location is inside the high impact zone
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#15803d' }}>
-                    <CheckCircle2 size={16} /> Photo taken live, time and place match
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#15803d' }}>
-                    <CheckCircle2 size={16} /> 3 separate devices reported within 200 m
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#15803d' }}>
-                    <CheckCircle2 size={16} /> Request fits the area: flooded, medicine stock low
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#b45309' }}>
-                    <AlertTriangle size={16} /> New device with no report history
-                  </div>
-                </div>
-              </div>
-
-              {/* Trust Score Progress Bar */}
-              <div style={{
-                background: '#f8fafc',
-                border: '1px solid #e2e8f0',
-                borderRadius: 10,
-                padding: '10px 14px',
-                marginBottom: 14
-              }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: 11, fontWeight: 700, color: '#475569' }}>Trust score (AI-assisted)</span>
-                  <span style={{ fontSize: 14, fontWeight: 900, color: '#0f172a' }}>{selectedReport.trust_score || 78} / 100</span>
-                </div>
-                <div className="trust-meter-bar">
-                  <div className="trust-meter-fill" style={{ width: `${selectedReport.trust_score || 78}%` }} />
-                </div>
-                <div style={{ fontSize: 10, color: '#64748b', marginTop: 4 }}>
-                  AI only ranks and flags. A responder decides. Anyone flagged can appeal.
-                </div>
-              </div>
-
-              {/* Nearest Match Callout */}
-              <div style={{
-                background: '#f0fdf4',
-                border: '1px solid #86efac',
-                borderRadius: 10,
-                padding: '10px 12px',
-                marginBottom: 14,
-                fontSize: 12,
-                color: '#15803d',
-                fontWeight: 600
-              }}>
-                <strong>Nearest match:</strong> {selectedReport.nearby_match || 'Camp A has insulin (low stock), 1.1 km away.'}
+              <div style={{ display: 'grid', gap: 10, marginBottom: 14, fontSize: 13, color: '#334155' }}>
+                <div><strong>Status:</strong> {selectedReport.verification_status}</div>
+                <div><strong>Location:</strong> {selectedReport.location_name || selectedReport.ward || 'Not provided'}{selectedReport.latitude != null && selectedReport.longitude != null ? ` · ${selectedReport.latitude.toFixed(4)}, ${selectedReport.longitude.toFixed(4)}` : ''}</div>
+                <div><strong>Description:</strong> {selectedReport.description || 'No description provided.'}</div>
+                {selectedReport.trust_score != null && <div><strong>Automated score:</strong> {selectedReport.trust_score} / 100</div>}
+                {selectedReport.nearby_match && <div><strong>Nearby resource:</strong> {selectedReport.nearby_match}</div>}
+                {selectedReport.evidence_url && <a href={selectedReport.evidence_url} target="_blank" rel="noreferrer">Open attached evidence</a>}
               </div>
 
               {/* Action Buttons */}

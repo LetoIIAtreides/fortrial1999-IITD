@@ -23,7 +23,8 @@ import {
   Map as MapIcon,
   PlusCircle,
   HeartHandshake,
-  Layers
+  Layers,
+  Flame
 } from 'lucide-react';
 import { api } from './api/client';
 import { EmergencyReport, HealthcareFacility, UserProfile, VerificationStatus } from './types';
@@ -35,6 +36,7 @@ import { ResponderConsoleScreen } from './components/ConsoleScreen';
 import { FacilitiesList } from './components/FacilityList';
 import { LoginModal } from './components/LoginModal';
 import { ReportDetailModal } from './components/DetailModal';
+import { HeatmapScreen } from './components/HeatmapScreen';
 
 export const App: React.FC = () => {
   // Navigation & Current Screen
@@ -51,6 +53,7 @@ export const App: React.FC = () => {
     | 'facilities'
     | 'help_info'
     | 'responder_console'
+    | 'supply_heatmap'
   >('home');
 
   // Need/Offer initial mode
@@ -86,6 +89,7 @@ export const App: React.FC = () => {
 
   const [facilities, setFacilities] = useState<HealthcareFacility[]>([]);
   const [backendReports, setBackendReports] = useState<EmergencyReport[]>([]);
+  const [backendReportsError, setBackendReportsError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   // Responder Auth state
@@ -111,35 +115,46 @@ export const App: React.FC = () => {
       const facList = await api.getFacilities().catch(() => []);
       if (facList.length > 0) setFacilities(facList);
 
-      // Fetch backend reports
-      const repList = await api.getReports({ page_size: 50 }).catch(() => ({ items: [] }));
-      if (repList.items) {
-        setBackendReports(repList.items);
-
-        // Merge backend verified states into local reports
-        setLocalReports((prev) =>
-          prev.map((loc) => {
-            const serverMatch = repList.items.find((s) => s.report_id === loc.report_id);
-            if (serverMatch) {
-              return {
-                ...loc,
-                sync_status: 'RECEIVED_BY_SERVER',
-                verification_status: serverMatch.verification_status,
-                verified_by: serverMatch.verified_by,
-                verification_notes: serverMatch.verification_notes,
-                last_synced_at: serverMatch.last_synced_at
-              };
-            }
-            return loc;
-          })
-        );
+      // Detailed reports contain sensitive health and location data; only load them for responders.
+      if (user) {
+        try {
+          const repList = await api.getReports({ page_size: 50 });
+          setBackendReports(repList.items);
+          setBackendReportsError(null);
+          setLocalReports((prev) =>
+            prev.map((loc) => {
+              const serverMatch = repList.items.find((serverReport) => serverReport.report_id === loc.report_id);
+              return serverMatch
+                ? {
+                    ...loc,
+                    sync_status: 'RECEIVED_BY_SERVER',
+                    verification_status: serverMatch.verification_status,
+                    verified_by: serverMatch.verified_by,
+                    verification_notes: serverMatch.verification_notes,
+                    last_synced_at: serverMatch.last_synced_at,
+                  }
+                : loc;
+            })
+          );
+        } catch {
+          setBackendReportsError('Could not load reports. Refresh or sign in again to retry.');
+        }
+      } else {
+        setBackendReports([]);
+        setBackendReportsError(null);
       }
     } catch {
       setIsOnline(false);
     }
-  }, []);
+  }, [user]);
 
   useEffect(() => {
+    const token = localStorage.getItem('medlink_token');
+    if (token) {
+      api.getMe().then(setUser).catch(() => {
+        localStorage.removeItem('medlink_token');
+      });
+    }
     checkHealthAndSync();
     const interval = setInterval(checkHealthAndSync, 10000);
     return () => clearInterval(interval);
@@ -232,14 +247,39 @@ export const App: React.FC = () => {
   const combinedReports = Array.from(allReportsMap.values());
 
   // Render Full Responder Console if selected
+  if (currentScreen === 'supply_heatmap') {
+    return (
+      <div className="desktop-viewport">
+        <HeatmapScreen
+          user={user}
+          onNavigateHome={() => setCurrentScreen('home')}
+          onLoginClick={() => setShowLoginModal(true)}
+          onUserRestored={setUser}
+        />
+        {showLoginModal && (
+          <LoginModal
+            onClose={() => setShowLoginModal(false)}
+            onSuccess={(loggedInUser: UserProfile) => {
+              setUser(loggedInUser);
+              setShowLoginModal(false);
+              checkHealthAndSync();
+            }}
+          />
+        )}
+      </div>
+    );
+  }
+
   if (currentScreen === 'responder_console') {
     return (
       <div className="desktop-viewport">
         <ResponderConsoleScreen
           reports={combinedReports}
+          reportsError={backendReportsError}
           user={user}
           onNavigateHome={() => setCurrentScreen('home')}
           onLoginClick={() => setShowLoginModal(true)}
+          onOpenHeatmap={() => setCurrentScreen('supply_heatmap')}
         />
         {showLoginModal && (
           <LoginModal
@@ -292,6 +332,16 @@ export const App: React.FC = () => {
             className="lang-btn"
           >
             {lang === 'en' ? 'हिन्दी' : 'EN'}
+          </button>
+
+          <button
+            onClick={() => setCurrentScreen('supply_heatmap')}
+            className="tts-btn"
+            style={{ color: '#dc2626' }}
+            title="Authority victim population tracker"
+            aria-label="Open authority victim population tracker"
+          >
+            <Flame size={18} />
           </button>
 
           <button
@@ -457,6 +507,26 @@ export const App: React.FC = () => {
                   </div>
                   <div className="secondary-card-desc">
                     {lang === 'hi' ? 'बाढ़ मार्ग स्थिति और नाव/एंबुलेंस अनुरोध' : 'Flood route accessibility and transit options'}
+                  </div>
+                </div>
+              </div>
+
+              {/* Supply heatmap */}
+              <div
+                className="secondary-action-card"
+                onClick={() => setCurrentScreen('supply_heatmap')}
+              >
+                <div className="secondary-card-icon-box" style={{ background: '#fee2e2', color: '#b91c1c' }}>
+                  <Flame size={22} />
+                </div>
+                <div>
+                  <div className="secondary-card-title">
+                    {lang === 'hi' ? 'आपूर्ति हीटमैप' : 'Supply Heatmap'}
+                  </div>
+                  <div className="secondary-card-desc">
+                    {lang === 'hi'
+                      ? 'पीड़ितों और बचावकर्मियों का क्षेत्रीय घनत्व देखें'
+                      : 'See where victims and rescuers cluster so supplies can be sent there'}
                   </div>
                 </div>
               </div>

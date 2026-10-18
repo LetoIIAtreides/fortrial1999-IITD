@@ -133,6 +133,53 @@ export interface DashboardSummary {
   sample_note: string;
 }
 
+export interface HeatmapCategorySplit {
+  category: string;
+  victim_people: number;
+  victim_reports: number;
+  rescuer_units: number;
+  rescuer_reports: number;
+  supply_gap: number;
+}
+
+export interface HeatmapCell {
+  cell_id: string;
+  latitude: number;
+  longitude: number;
+  victim_people: number;
+  victim_reports: number;
+  rescuer_units: number;
+  rescuer_reports: number;
+  supply_gap: number;
+  flagged_reports: number;
+  top_category: string | null;
+  categories: HeatmapCategorySplit[];
+  recommended_action: string;
+}
+
+export interface HeatmapFacility {
+  facility_id: string;
+  name: string;
+  facility_type: string;
+  latitude: number;
+  longitude: number;
+  is_operational: boolean;
+}
+
+export interface HeatmapResponse {
+  cells: HeatmapCell[];
+  facilities: HeatmapFacility[];
+  reports_with_location: number;
+  unlocated_reports: number;
+  victim_people_total: number;
+  rescuer_units_total: number;
+  grid_size_meters: number;
+  last_updated: string;
+  privacy_note: string;
+  sample_note: string;
+  contains_demo_data: boolean;
+}
+
 export interface UserProfile {
   user_id: string;
   username: string;
