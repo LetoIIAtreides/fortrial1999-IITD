@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Zap, MapPin, CheckCircle2 } from 'lucide-react';
+import { X, Zap, MapPin, CheckCircle2, Home } from 'lucide-react';
 
 interface LiveCameraScreenProps {
   onClose: () => void;
@@ -129,7 +129,7 @@ export const LiveCameraScreen: React.FC<LiveCameraScreenProps> = ({
             Water depth ~1.2 m (low confidence)
           </div>
 
-          <div style={{ fontSize: 44, opacity: 0.8 }}>🏠</div>
+          <Home size={44} style={{ opacity: 0.8 }} />
         </div>
 
         {/* Dashed Estimated Waterline */}

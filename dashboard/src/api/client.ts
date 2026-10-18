@@ -205,4 +205,59 @@ export const api = {
     if (!res.ok) throw new Error('Failed to fetch dashboard summary');
     return res.json();
   },
+
+  async getResources(params?: { kind?: string; item?: string; bbox?: string }): Promise<EmergencyReport[]> {
+    const query = new URLSearchParams();
+    if (params?.kind) query.append('kind', params.kind);
+    if (params?.item) query.append('item', params.item);
+    if (params?.bbox) query.append('bbox', params.bbox);
+    const res = await fetch(`${API_BASE}/resources${query.toString() ? '?' + query.toString() : ''}`);
+    if (!res.ok) throw new Error('Failed to fetch resources');
+    return res.json();
+  },
+
+  async postResource(payload: any): Promise<EmergencyReport> {
+    const res = await fetch(`${API_BASE}/resources`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) throw new Error('Failed to post resource');
+    return res.json();
+  },
+
+  async getImpactZones(): Promise<any> {
+    const res = await fetch(`${API_BASE}/impact`);
+    if (!res.ok) throw new Error('Failed to fetch impact zones');
+    return res.json();
+  },
+
+  async getAlerts(): Promise<any[]> {
+    const res = await fetch(`${API_BASE}/alerts`);
+    if (!res.ok) throw new Error('Failed to fetch alerts');
+    return res.json();
+  },
+
+  async getResponderQueue(params?: { status_filter?: string; category?: string; ward?: string }): Promise<EmergencyReport[]> {
+    const query = new URLSearchParams();
+    if (params?.status_filter) query.append('status_filter', params.status_filter);
+    if (params?.category) query.append('category', params.category);
+    if (params?.ward) query.append('ward', params.ward);
+    const res = await fetch(`${API_BASE}/responder/queue${query.toString() ? '?' + query.toString() : ''}`);
+    if (!res.ok) throw new Error('Failed to fetch responder queue');
+    return res.json();
+  },
+
+  async makeResponderDecision(reportId: string, payload: { decision: string; assigned_to?: string; reason?: string; notes?: string }): Promise<EmergencyReport> {
+    const res = await fetch(`${API_BASE}/responder/reports/${reportId}/decision`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail || 'Failed to submit responder decision');
+    }
+    return res.json();
+  },
 };

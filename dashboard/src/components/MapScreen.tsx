@@ -13,7 +13,9 @@ import {
   Activity,
   Truck,
   Compass,
-  Navigation
+  Navigation,
+  Check,
+  Package
 } from 'lucide-react';
 import L from 'leaflet';
 import { EmergencyReport } from '../types';
@@ -23,7 +25,7 @@ interface EmergencyMapScreenProps {
   isOnline: boolean;
   onNavigate: (screen: any) => void;
   onSelectReportForDetails: (report: EmergencyReport) => void;
-  onOfferHelp: (report: EmergencyReport) => void;
+  onOfferHelp?: (report: EmergencyReport) => void;
 }
 
 export const EmergencyMapScreen: React.FC<EmergencyMapScreenProps> = ({
@@ -121,23 +123,31 @@ export const EmergencyMapScreen: React.FC<EmergencyMapScreenProps> = ({
       // Status badge overlay
       let badgeHtml = '';
       if (isVerified) {
-        badgeHtml = '<div class="marker-status-badge verified">✓</div>';
+        badgeHtml = '<div class="marker-status-badge verified"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></div>';
       } else if (isFlagged) {
-        badgeHtml = '<div class="marker-status-badge flagged">!</div>';
+        badgeHtml = '<div class="marker-status-badge flagged"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg></div>';
       } else {
-        badgeHtml = '<div class="marker-status-badge unverified">?</div>';
+        badgeHtml = '<div class="marker-status-badge unverified"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></div>';
       }
 
-      // Icon symbol based on emergency type
-      let symbol = '●';
+      // Vector SVG icon symbol based on emergency type
       const typeLower = (rep.emergency_type || '').toLowerCase();
-      if (typeLower.includes('insulin') || typeLower.includes('water')) symbol = '💧';
-      else if (typeLower.includes('medicine')) symbol = '💊';
-      else if (typeLower.includes('pregnancy')) symbol = '🤰';
-      else if (typeLower.includes('first aid')) symbol = '✚';
-      else if (typeLower.includes('transport') || typeLower.includes('ambulance')) symbol = '🚑';
-      else if (typeLower.includes('food')) symbol = '🍲';
-      else symbol = isNeed ? '●' : '■';
+      let iconSvg = '';
+      if (typeLower.includes('bleed') || typeLower.includes('water') || typeLower.includes('insulin')) {
+        iconSvg = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>';
+      } else if (typeLower.includes('medicine')) {
+        iconSvg = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/></svg>';
+      } else if (typeLower.includes('pregnan')) {
+        iconSvg = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12h.01"/><path d="M15 12h.01"/><path d="M10 16c.5.3 1.2.5 2 .5s1.5-.2 2-.5"/><path d="M19 6.3a9 9 0 0 1 1.8 3.9 2 2 0 0 1 0 3.6 9 9 0 0 1-17.6 0 2 2 0 0 1 0-3.6A9 9 0 0 1 12 3c2 0 3.5 1.1 3.5 2.5s-.9 2.5-2 2.5c-.8 0-1.5-.4-1.5-1"/></svg>';
+      } else if (typeLower.includes('first aid')) {
+        iconSvg = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M8 12h8"/><path d="M12 8v8"/></svg>';
+      } else if (typeLower.includes('transport') || typeLower.includes('ambulance')) {
+        iconSvg = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></svg>';
+      } else {
+        iconSvg = isNeed
+          ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><circle cx="12" cy="12" r="10"/></svg>'
+          : '<svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><rect width="18" height="18" x="3" y="3" rx="2"/></svg>';
+      }
 
       const markerClass = isNeed ? 'marker-need-circle' : 'marker-offer-square';
 
@@ -145,7 +155,7 @@ export const EmergencyMapScreen: React.FC<EmergencyMapScreenProps> = ({
         className: 'custom-leaflet-marker',
         html: `
           <div class="${markerClass}">
-            <span style="font-size: 15px;">${symbol}</span>
+            <div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%">${iconSvg}</div>
             ${badgeHtml}
           </div>
         `,
@@ -251,7 +261,7 @@ export const EmergencyMapScreen: React.FC<EmergencyMapScreenProps> = ({
         <div className="map-selected-card">
           <div className="map-selected-header">
             <div className={`selected-cat-icon ${(selectedReport.report_type || 'NEED') === 'NEED' ? 'need' : 'offer'}`}>
-              {(selectedReport.report_type || 'NEED') === 'NEED' ? '💧' : '■'}
+              {(selectedReport.report_type || 'NEED') === 'NEED' ? <Droplet size={18} /> : <Package size={18} />}
             </div>
             <div style={{ flex: 1 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -276,9 +286,20 @@ export const EmergencyMapScreen: React.FC<EmergencyMapScreenProps> = ({
               borderRadius: 6,
               background: '#f8fafc',
               border: selectedReport.verification_status === 'VERIFIED' ? '1px solid #16a34a' : '1px dashed #64748b',
-              color: selectedReport.verification_status === 'VERIFIED' ? '#15803d' : '#475569'
+              color: selectedReport.verification_status === 'VERIFIED' ? '#15803d' : '#475569',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 4
             }}>
-              {selectedReport.verification_status === 'VERIFIED' ? '✓ Verified' : 'Unverified'}
+              {selectedReport.verification_status === 'VERIFIED' ? (
+                <>
+                  <Check size={12} strokeWidth={3} /> Verified
+                </>
+              ) : (
+                <>
+                  <HelpCircle size={12} /> Unverified
+                </>
+              )}
             </span>
             <span style={{
               fontSize: 11,
@@ -296,7 +317,7 @@ export const EmergencyMapScreen: React.FC<EmergencyMapScreenProps> = ({
           {/* Action Buttons: Green "I can help" & White "Details" */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
             <button
-              onClick={() => onOfferHelp(selectedReport)}
+              onClick={() => onOfferHelp?.(selectedReport)}
               style={{
                 height: 44,
                 background: '#15803d',

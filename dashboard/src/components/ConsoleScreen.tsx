@@ -9,9 +9,13 @@ import {
   Filter, 
   Eye, 
   Lock,
-  MessageSquare,
   HelpCircle,
-  ExternalLink
+  ExternalLink,
+  Droplet,
+  Package,
+  Check,
+  AlertCircle,
+  Home
 } from 'lucide-react';
 import L from 'leaflet';
 import { api } from '../api/client';
@@ -109,23 +113,19 @@ export const ResponderConsoleScreen: React.FC<ResponderConsoleScreenProps> = ({
       const isFlagged = rep.verification_status === 'FLAGGED' || !!rep.flagged_reason;
 
       let badgeHtml = '';
-      if (isVerified) badgeHtml = '<div class="marker-status-badge verified">✓</div>';
+      if (isVerified) badgeHtml = '<div class="marker-status-badge verified"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>';
       else if (isFlagged) badgeHtml = '<div class="marker-status-badge flagged">!</div>';
       else badgeHtml = '<div class="marker-status-badge unverified">?</div>';
 
-      let symbol = isNeed ? '●' : '■';
-      const typeLower = (rep.emergency_type || '').toLowerCase();
-      if (typeLower.includes('insulin')) symbol = '💧';
-      else if (typeLower.includes('medicine')) symbol = '💊';
-      else if (typeLower.includes('pregnancy')) symbol = '🤰';
-      else if (typeLower.includes('food')) symbol = '🍲';
-      else if (typeLower.includes('ambulance') || typeLower.includes('transport')) symbol = '🚑';
+      const iconSvg = isNeed
+        ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>`
+        : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16.5 9.4 7.55 4.24a1.78 1.78 0 0 0-2.5 1.55v12.42a1.78 1.78 0 0 0 2.5 1.55L16.5 14.6a1.78 1.78 0 0 0 0-3.2z"/></svg>`;
 
       const customIcon = L.divIcon({
         className: 'custom-leaflet-marker',
         html: `
           <div class="${isNeed ? 'marker-need-circle' : 'marker-offer-square'}">
-            <span style="font-size: 15px;">${symbol}</span>
+            ${iconSvg}
             ${badgeHtml}
           </div>
         `,
@@ -311,7 +311,7 @@ export const ResponderConsoleScreen: React.FC<ResponderConsoleScreenProps> = ({
                       fontSize: 13,
                       flexShrink: 0
                     }}>
-                      {isNeed ? '💧' : '■'}
+                      {isNeed ? <Droplet size={15} /> : <Package size={15} />}
                     </div>
 
                     <div style={{ flex: 1 }}>
@@ -342,9 +342,22 @@ export const ResponderConsoleScreen: React.FC<ResponderConsoleScreenProps> = ({
                           padding: '2px 6px',
                           borderRadius: 4,
                           background: isVerified ? '#dcfce7' : (isFlagged ? '#fee2e2' : '#f1f5f9'),
-                          color: isVerified ? '#15803d' : (isFlagged ? '#b91c1c' : '#475569')
+                          color: isVerified ? '#15803d' : (isFlagged ? '#b91c1c' : '#475569'),
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 3
                         }}>
-                          {isVerified ? '✓ Verified' : (isFlagged ? '! Flagged' : `Trust ${rep.trust_score || 78}`)}
+                          {isVerified ? (
+                            <>
+                              <Check size={11} strokeWidth={3} /> Verified
+                            </>
+                          ) : (isFlagged ? (
+                            <>
+                              <AlertCircle size={11} /> Flagged
+                            </>
+                          ) : (
+                            `Trust ${rep.trust_score || 78}`
+                          ))}
                         </span>
                         <span style={{ fontSize: 10, color: '#94a3b8' }}>
                           {rep.ai_check_status || 'Likely genuine'}
@@ -426,7 +439,7 @@ export const ResponderConsoleScreen: React.FC<ResponderConsoleScreenProps> = ({
                   fontSize: 16,
                   flexShrink: 0
                 }}>
-                  {(selectedReport.report_type || 'NEED') === 'NEED' ? '💧' : '■'}
+                  {(selectedReport.report_type || 'NEED') === 'NEED' ? <Droplet size={18} /> : <Package size={18} />}
                 </div>
 
                 <div>
@@ -460,10 +473,9 @@ export const ResponderConsoleScreen: React.FC<ResponderConsoleScreenProps> = ({
                   borderRadius: 6,
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: 28
+                  justifyContent: 'center'
                 }}>
-                  🏠
+                  <Home size={32} color="#cbd5e1" />
                 </div>
                 <div style={{
                   position: 'absolute',

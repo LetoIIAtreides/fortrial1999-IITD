@@ -185,3 +185,66 @@ def test_dashboard_summary():
     assert "offers_count" in data
     assert "verified_count" in data
     assert data["affected_area_km2"] == 2.4
+
+def test_resources_and_offers():
+    # 1. Post a resource offer
+    res_id = f"test-offer-{uuid.uuid4()}"
+    offer_payload = {
+        "report_id": res_id,
+        "report_type": "OFFER",
+        "emergency_type": "Clean water",
+        "urgency": "Medium",
+        "latitude": 30.556,
+        "longitude": 79.567,
+        "location_name": "Camp A relief station",
+        "description": "50L potable water available for distribution"
+    }
+    create_res = client.post("/resources", json=offer_payload)
+    assert create_res.status_code == 201
+    assert create_res.json()["report_id"] == res_id
+    assert create_res.json()["report_type"] == "OFFER"
+
+    # 2. Query resources
+    list_res = client.get("/resources?kind=OFFER")
+    assert list_res.status_code == 200
+    assert any(r["report_id"] == res_id for r in list_res.json())
+
+def test_impact_and_alerts():
+    # 1. Impact GeoJSON
+    imp_res = client.get("/impact")
+    assert imp_res.status_code == 200
+    imp_data = imp_res.json()
+    assert imp_data["type"] == "FeatureCollection"
+    assert imp_data["is_estimate"] is True
+    assert len(imp_data["features"]) >= 1
+
+    # 2. Area alerts
+    alert_res = client.get("/alerts")
+    assert alert_res.status_code == 200
+    alerts = alert_res.json()
+    assert len(alerts) >= 1
+    assert alerts[0]["is_estimate"] is True
+
+def test_transport_endpoint():
+    res = client.get("/transport")
+    assert res.status_code == 200
+    assert len(res.json()) >= 1
+
+def test_responder_queue_and_decision():
+    # 1. Get queue
+    q_res = client.get("/responder/queue")
+    assert q_res.status_code == 200
+    assert isinstance(q_res.json(), list)
+
+    # 2. Decision on report
+    rep = q_res.json()[0]
+    rep_id = rep["report_id"]
+    dec_res = client.post(f"/responder/reports/{rep_id}/decision", json={
+        "decision": "VERIFY_AND_ASSIGN",
+        "assigned_to": "SDRF Team Bravo",
+        "notes": "Verified via radio check"
+    })
+    assert dec_res.status_code == 200
+    assert dec_res.json()["verification_status"] == "VERIFIED"
+    assert dec_res.json()["assigned_to"] == "SDRF Team Bravo"
+
